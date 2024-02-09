@@ -1,6 +1,13 @@
 import os
-from flask import Flask, send_from_directory, send_file, g, Response, request
-from app.db_helper import get_db, insert_articles, insert_print_article, clean, get_article_from_key
+from flask import Flask, send_from_directory, send_file, g, Response
+from .db_helper import (
+    get_db,
+    insert_articles,
+    insert_print_article,
+    clean,
+    get_article_from_key,
+    get_first_article, get_categories,
+)
 from .dlf import (
     download_article,
     download_wochenrueckblick,
@@ -20,6 +27,19 @@ def close_connection(_exception):
 
 
 @app.route("/")
+@app.route("/tinder")
+@app.route("/tinder/")
+@app.route("/tinder/index.html")
+@app.route("/tinder.html")
+@app.route("/pdflist")
+@app.route("/pdflist/")
+@app.route("/pdflist/index.html")
+@app.route("/pdflist.html")
+@app.route("/pdfcreate")
+@app.route("/pdfcreate/")
+@app.route("/pdfcreate/index.html")
+@app.route("/pdfcreate.html")
+@app.route("/index.html")
 def index():
     db = get_db()
     with app.open_resource("schema.sql", mode="r") as f:
@@ -39,7 +59,14 @@ def articles_get():
     return parse_wochenrueckblick(wr)
 
 
-@app.route("/article/<string:ref>", methods=['GET', 'DELETE'])
+@app.route("/article")
+def first_article():
+    article = get_first_article(get_db(), app)
+    html = download_article(DLF_PREFIX + article["href"])
+    return parse_article(html)
+
+
+@app.route("/article/<string:ref>", methods=["GET", "DELETE"])
 def article_get(ref: str):
     html = download_article(DLF_PREFIX + ref)
     return parse_article(html)
@@ -51,6 +78,11 @@ def add_article(ref: str):
     article = parse_article(html)
     insert_print_article(get_db(), article)
     return Response("Created", 201)
+
+
+@app.route("/categories")
+def categories():
+    return get_categories(get_db())
 
 
 @app.route("/clean")

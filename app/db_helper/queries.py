@@ -7,12 +7,18 @@ INSERT OR IGNORE INTO `articles`
     VALUES (  ?,     ?,              ?,          ?,    ?,          ?,    ?);
 """
 
+FIRST_ARTICLE = """
+SELECT * FROM `articles` SORT ORDER BY `date` DESC LIMIT 1
+"""
+
 GET_ARTICLE_KEY = """SELECT * FROM `articles` WHERE `key` = (?)"""
+
+GET_CATEGORIES = """SELECT DISTINCT `category` FROM `print_articles`"""
 
 INSERT_PRINT_ARTICLES = """
 INSERT OR IGNORE INTO `print_articles`
-           (hash, kicker, title, description, content)
-    VALUES (   ?,     ?,     ?,           ?,       ?);
+           (hash, kicker, title, description, content, date, category)
+    VALUES (   ?,     ?,     ?,           ?,        ?,    ?,        ?);
 """
 
 REMOVE = """DELETE FROM `articles` WHERE `key` = (?)"""

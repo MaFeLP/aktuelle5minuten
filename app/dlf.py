@@ -28,6 +28,37 @@ def download_wochenrueckblick() -> str:
     return r.text
 
 
+def _parse_partial_article(script: Tag) -> dict | None:
+    j = json.loads(script["data-json"])
+    key = j["key"]
+    j = j["value"]
+
+    if "__typename" not in j:
+        if "data" in j and "newsByWeek" in j["data"]:
+            # One extra element that is not an article
+            return None
+        _LOGGER.warning(
+            "Found data element that does not fit scheme! See debug output for more information"
+        )
+        _LOGGER.debug(json.dumps(j))
+        return None
+
+    if j["__typename"] == "Teaser" and j["path"] not in _NON_ARTICLES_URLS:
+        _LOGGER.info(f"  -> Found Article '{j['title']}'")
+        return {
+            "key": key,
+            "title": j["title"],
+            "teaserHeadline": j["teaserHeadline"],
+            "teaserText": j["teasertext"],
+            "date": j["firstPublicationDate"],
+            "localeDate": j["dateLocalizedFormatted"],
+            "href": j["path"],
+        }
+    else:
+        _LOGGER.debug(f"Not a Teaser/News Article: {j}")
+    return None
+
+
 def parse_wochenrueckblick(wr: str) -> list[dict[str, str]]:
     soup = BeautifulSoup(wr, "lxml")
     main = soup.main
@@ -38,35 +69,9 @@ def parse_wochenrueckblick(wr: str) -> list[dict[str, str]]:
     articles = []
     _LOGGER.info("Parsing Wochenrückblick...")
     for script in main.find_all("script"):
-        j = json.loads(script["data-json"])
-        key = j["key"]
-        j = j["value"]
-
-        if "__typename" not in j:
-            if "data" in j and "newsByWeek" in j["data"]:
-                # One extra element that is not an article
-                continue
-            _LOGGER.warning(
-                "Found data element that does not fit scheme! See debug output for more information"
-            )
-            _LOGGER.debug(json.dumps(j))
-            continue
-
-        if j["__typename"] == "Teaser" and j["path"] not in _NON_ARTICLES_URLS:
-            _LOGGER.info(f"  -> Found Article '{j['title']}'")
-            articles.append(
-                {
-                    "key": key,
-                    "title": j["title"],
-                    "teaserHeadline": j["teaserHeadline"],
-                    "teaserText": j["teasertext"],
-                    "date": j["firstPublicationDate"],
-                    "localeDate": j["dateLocalizedFormatted"],
-                    "href": j["path"],
-                }
-            )
-        else:
-            _LOGGER.debug(f"Not a Teaser/News Article: {j}")
+        article = _parse_partial_article(script)
+        if article is not None:
+            articles.append(article)
     return articles
 
 
@@ -81,6 +86,16 @@ def download_article(href: str) -> str:
 
 def parse_article(html: str) -> dict[str, str]:
     soup: Tag = BeautifulSoup(html, "lxml")
+
+    # Parse Head for Metadata
+    head: Tag = soup.head
+    metadata: None | dict = None
+    for script in head.find_all("script", {"class": "js-client-queries"}):
+        metadata = _parse_partial_article(script)
+        if metadata is not None:
+            break
+
+    # Parse content
     article: Tag = soup.find("article", {"class": "b-article"})
     header: Tag = article.header
     section: Tag = article.section
@@ -89,7 +104,15 @@ def parse_article(html: str) -> dict[str, str]:
     figures: list[dict[str, str]] = []
     for figure in section.find_all("figure"):
         img: Tag = figure.img
-        figures.append({"image": img.decode(), "caption": figure.figcaption.text})
+        figures.append({
+            "image": {
+                "src": img["src"],
+                "alt": img["alt"],
+                "srcset": img["srcset"],
+                "title": img["title"]
+            },
+            "caption": figure.figcaption.text,
+        })
         figure.decompose()
     for script in section.find_all("script"):
         script.decompose()
@@ -104,4 +127,7 @@ def parse_article(html: str) -> dict[str, str]:
             "plaintext": section.text.strip(),
         },
         "figures": figures,
+        "key": metadata["key"],
+        "date": metadata["date"],
+        "localeDate": metadata["localeDate"],
     }

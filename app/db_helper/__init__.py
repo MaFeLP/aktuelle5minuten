@@ -1,6 +1,6 @@
 import hashlib
 from ..dlf import PREFIX as DLF_PREFIX
-from flask import g
+from flask import g, Flask
 from sqlite3 import Connection, connect
 from .queries import *
 
@@ -33,10 +33,36 @@ def delete_article(db: Connection, key):
     db.commit()
 
 
-def get_article_from_key(db: Connection, key):
+def _article_from_db_result(row: tuple):
+    return {
+        "key": row[0],
+        "title": row[1],
+        "teaserHeadline": row[2],
+        "teaserText": row[3],
+        "date": row[4],
+        "localeDate": row[5],
+        "href": row[6],
+    }
+
+
+def get_article_from_key(db: Connection, app, key):
     cursor = db.cursor()
-    article = cursor.execute(GET_ARTICLE_KEY, key)
-    print(article)
+    result = cursor.execute(GET_ARTICLE_KEY, key).fetchall()
+    article = _article_from_db_result(result[0])
+    app.logger.debug(article)
+    return article
+
+
+def get_categories(db: Connection) -> list:
+    cursor = db.cursor()
+    return [row[0] for row in cursor.execute(GET_CATEGORIES).fetchall()]
+
+
+def get_first_article(db: Connection, app: Flask):
+    cursor = db.cursor()
+    result = cursor.execute(FIRST_ARTICLE).fetchall()
+    article = _article_from_db_result(result[0])
+    app.logger.debug(article)
     return article
 
 
