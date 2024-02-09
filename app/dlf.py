@@ -7,14 +7,16 @@ from bs4 import BeautifulSoup, Tag
 from sys import exit
 from flask import abort
 
-_WOCHENRUECKBLICK_URL = "https://www.deutschlandfunk.de/nachrichten/wochenueberblick"
+PREFIX = "https://www.deutschlandfunk.de/"
+
+_WOCHENRUECKBLICK_URL = PREFIX + "nachrichten/wochenueberblick"
 
 _LOGGER = logging.getLogger(__name__)
 
 _NON_ARTICLES_URLS = [
-    "https://www.deutschlandfunk.de/nachrichten/nachlesen",
-    "https://www.deutschlandfunk.de/suche",
-    "https://www.deutschlandfunk.de/nachrichten/barrierefrei",
+    PREFIX + "nachrichten/nachlesen",
+    PREFIX + "suche",
+    PREFIX + "nachrichten/barrierefrei",
 ]
 
 

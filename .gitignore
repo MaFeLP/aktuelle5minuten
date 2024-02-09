@@ -91,6 +91,7 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+app/static
 
 # Gatsby files
 .cache/
@@ -291,3 +292,5 @@ cython_debug/
 ### Flask template
 instance/*
 !instance/.gitignore
+
+app/pdfs
