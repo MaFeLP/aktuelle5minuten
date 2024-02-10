@@ -3,10 +3,12 @@ from flask import Flask, send_from_directory, send_file, g, Response
 from .db_helper import (
     get_db,
     insert_articles,
-    insert_print_article,
+    update_article_contents,
     clean,
     get_article_from_key,
     get_first_article, get_categories,
+    promote_article as db_promote_article,
+    demote_article as db_demote_article,
 )
 from .dlf import (
     download_article,
@@ -15,6 +17,16 @@ from .dlf import (
     parse_wochenrueckblick,
     PREFIX as DLF_PREFIX,
 )
+
+_DEFAULT_CATEGORIES = [
+    "Aktuelles Ereignis",
+    "Außenpolitik",
+    "Hamburg",
+    "Politik",
+    "Sonstiges",
+    "USA",
+    "Wirtschaft",
+]
 
 app = Flask(__name__, static_url_path="", static_folder="static")
 
@@ -62,11 +74,13 @@ def articles_get():
 @app.route("/article")
 def first_article():
     article = get_first_article(get_db(), app)
+    if article is None:
+        return Response("No articles found", 404)
     html = download_article(DLF_PREFIX + article["href"])
     return parse_article(html)
 
 
-@app.route("/article/<string:ref>", methods=["GET", "DELETE"])
+@app.route("/article/<string:ref>")
 def article_get(ref: str):
     html = download_article(DLF_PREFIX + ref)
     return parse_article(html)
@@ -76,13 +90,17 @@ def article_get(ref: str):
 def add_article(ref: str):
     html = download_article(DLF_PREFIX + ref)
     article = parse_article(html)
-    insert_print_article(get_db(), article)
+    update_article_contents(get_db(), article)
     return Response("Created", 201)
 
 
 @app.route("/categories")
 def categories():
-    return get_categories(get_db())
+    db_categories = get_categories(get_db())
+    for category in _DEFAULT_CATEGORIES:
+        if category not in db_categories:
+            db_categories.append(category)
+    return sorted(db_categories)
 
 
 @app.route("/clean")
@@ -112,12 +130,18 @@ def load_articles_to_db():
     return Response("Created", 201)
 
 
-@app.route("/promote/<string:tag>/<string:key>")
-def promote_article(tag, key: str):
-    article = get_article_from_key(get_db(), key)
-    if article is None:
-        return Response("Not found", 404)
-    return Response("Ok", 200)
+@app.route("/demote/<string:key>")
+def demote_article(key: str):
+    db_demote_article(get_db(), key)
+    return Response("Ok", 201)
+
+
+@app.route("/promote/<string:category>/<string:key>")
+def promote_article(category: str, key: str):
+    if len(category) > 63:
+        return Response("Category too long. Maximum of 63 characters allowed", 400)
+    db_promote_article(get_db(), category, key)
+    return Response("Ok", 201)
 
 
 if __name__ == "__main__":

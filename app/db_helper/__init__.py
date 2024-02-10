@@ -1,6 +1,6 @@
 import hashlib
 from ..dlf import PREFIX as DLF_PREFIX
-from flask import g, Flask
+from flask import g, Flask, abort
 from sqlite3 import Connection, connect
 from .queries import *
 
@@ -23,13 +23,12 @@ def get_db():
 def clean(db: Connection):
     cursor = db.cursor()
     cursor.execute(CLEAN_ARTICLES)
-    cursor.execute(CLEAN_PRINT_ARTICLES)
     db.commit()
 
 
-def delete_article(db: Connection, key):
+def demote_article(db: Connection, key: str):
     cursor = db.cursor()
-    cursor.execute(REMOVE, key)
+    cursor.execute(DEMOTE_ARTICLE, [key,])
     db.commit()
 
 
@@ -42,12 +41,19 @@ def _article_from_db_result(row: tuple):
         "date": row[4],
         "localeDate": row[5],
         "href": row[6],
+        "kicker": row[7],
+        "description": row[8],
+        "content": row[9],
+        "category": row[10],
+        "status": row[11],
     }
 
 
-def get_article_from_key(db: Connection, app, key):
+def get_article_from_key(db: Connection, app, key: str) -> dict | None:
     cursor = db.cursor()
-    result = cursor.execute(GET_ARTICLE_KEY, key).fetchall()
+    result = cursor.execute(GET_ARTICLE_KEY, [key]).fetchall()
+    if len(result) == 0:
+        return None
     article = _article_from_db_result(result[0])
     app.logger.debug(article)
     return article
@@ -58,9 +64,11 @@ def get_categories(db: Connection) -> list:
     return [row[0] for row in cursor.execute(GET_CATEGORIES).fetchall()]
 
 
-def get_first_article(db: Connection, app: Flask):
+def get_first_article(db: Connection, app: Flask) -> dict | None:
     cursor = db.cursor()
     result = cursor.execute(FIRST_ARTICLE).fetchall()
+    if len(result) == 0:
+        return None
     article = _article_from_db_result(result[0])
     app.logger.debug(article)
     return article
@@ -87,14 +95,18 @@ def insert_articles(db: Connection, articles: list[dict]):
     db.commit()
 
 
-def insert_print_article(db: Connection, article: dict[str, str]):
-    # Get required elements
-    kicker = article["kicker"]
-    title = article["title"]
-    description = article["description"]
-    content = article["content"]["plaintext"]
-    elements = (kicker, title, description, content)
-    element_hash = _sha1sum("+".join(elements))
+def update_article_contents(db: Connection, article: dict[str, str]):
+    db.cursor().execute(INSERT_ARTICLE_CONTENT, (
+        article["kicker"],
+        article["description"],
+        article["content"]["plaintext"],
+        article["key"]
+    ))
+    db.commit()
 
-    db.cursor().execute(INSERT_PRINT_ARTICLES, (element_hash, *elements))
+
+def promote_article(db: Connection, key: str, category: str):
+    if len(category) > 63:
+        abort(400)
+    db.cursor().execute(PROMOTE_ARTICLE, (key, category))
     db.commit()
