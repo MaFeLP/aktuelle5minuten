@@ -11,7 +11,7 @@ FIRST_ARTICLE = """
 SELECT *
 FROM `articles`
 WHERE `status` = 0
-ORDER BY `date` DESC
+ORDER BY `date`
 LIMIT 1 
 """
 

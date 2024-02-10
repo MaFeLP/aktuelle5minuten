@@ -15,18 +15,6 @@
 
 <main>
     <section class="content">
-        <div class="alert alert-info">
-            <h2 class="alert-heading">
-                Info
-            </h2>
-            <div>
-                Dieser Teil der Webseite ist leider noch nicht verfügbar!
-            </div>
-            <a class="btn btn-primary" href="/">
-                Zurück zum Startbildschirm
-            </a>
-        </div>
-
         {#await articlePromise}
             <small class="text-muted">Laden...</small>
         {:then articleResponse}

@@ -97,6 +97,8 @@ def add_article(ref: str):
 @app.route("/categories")
 def categories():
     db_categories = get_categories(get_db())
+    if db_categories is None:
+        return sorted(_DEFAULT_CATEGORIES)
     for category in _DEFAULT_CATEGORIES:
         if category not in db_categories:
             db_categories.append(category)

@@ -61,7 +61,8 @@ def get_article_from_key(db: Connection, app, key: str) -> dict | None:
 
 def get_categories(db: Connection) -> list:
     cursor = db.cursor()
-    return [row[0] for row in cursor.execute(GET_CATEGORIES).fetchall()]
+    # TODO does this work?
+    return [row[0] for row in cursor.execute(GET_CATEGORIES).fetchall() if row[0] is not None]
 
 
 def get_first_article(db: Connection, app: Flask) -> dict | None:

@@ -1,10 +1,20 @@
 <script lang="ts">
+    import PromoteDialog from "./PromoteDialog.svelte";
+
     export let newArticle: () => void;
 
     export let article: any;
 
-    async function promote() {
-
+    async function promote(category: string) {
+        console.debug("Promoting article", article)
+        let response = await fetch(`/promote/${category}/${article["key"]}`);
+        console.debug("Response from promoting the article", response)
+        if (response.ok) {
+            newArticle();
+        } else {
+            console.error("Could not demote article:", article, response);
+            alert("Something went wrong, while demoting the article!");
+        }
     }
 
     async function demote() {
@@ -40,7 +50,9 @@
 
         <p class="card-text">{@html article["content"]["html"]}</p>
         <div id="button-row" class="row align-items-center">
-            <button class="select-btn col btn btn-outline-success">
+            <button class="select-btn col btn btn-outline-success" on:click={() => {
+                document.getElementById('promote-dialog').showModal();
+            }}>
                 <i class="bi bi-check2"></i>
             </button>
             <button class="select-btn col btn btn-outline-danger" on:click={demote}>
@@ -50,11 +62,20 @@
     </div>
 </div>
 
+<PromoteDialog promote={promote} closeDialog={() => {
+  document.getElementById('promote-dialog').close();
+}}/>
+
+<!--
 <code>
     {JSON.stringify(article)}
 </code>
+-->
 
 <style lang="sass">
+  #tinder-card
+    margin: 2em 0
+
   #button-row
     display: flex
     align-content: center
