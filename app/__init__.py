@@ -76,14 +76,20 @@ def first_article():
     article = get_first_article(get_db(), app)
     if article is None:
         return Response("No articles found", 404)
+    if article["contents"] is not None:
+        return article
     html = download_article(DLF_PREFIX + article["href"])
-    return parse_article(html)
+    parsed = parse_article(html)
+    update_article_contents(get_db(), parsed)
+    return parsed
 
 
 @app.route("/article/<string:ref>")
 def article_get(ref: str):
     html = download_article(DLF_PREFIX + ref)
-    return parse_article(html)
+    parsed = parse_article(html)
+    update_article_contents(get_db(), parsed)
+    return parsed
 
 
 @app.route("/add/<string:ref>")
