@@ -25,7 +25,7 @@ from .db_helper import (
     demote_article as db_demote_article,
     get_articles_from_category,
     mark_category_printed,
-    get_print_articles,
+    get_print_articles, mark_bullets_as_printed,
 )
 from .dlf import (
     download_article,
@@ -163,6 +163,7 @@ def add_bullets() -> Response:
                 input=tmp.name,
                 output=f"{app.root_path}/pdfs/{today.strftime('%Y-%m-%d_%H:%M:%S')}.pdf",
             )
+            mark_bullets_as_printed(get_db())
             return redirect(f"/files/{today.strftime('%Y-%m-%d_%H:%M:%S')}.pdf")
 
     return redirect("/pdfcreate")

@@ -23,6 +23,7 @@ def get_db():
 def clean(db: Connection):
     cursor = db.cursor()
     cursor.execute(CLEAN_ARTICLES)
+    cursor.execute(CLEAN_PRINT_ARTICLES)
     db.commit()
 
 
@@ -154,3 +155,8 @@ def insert_bullets(db: Connection, category: str, bullets: str):
 
 def get_print_articles(db: Connection) -> list:
     return db.cursor().execute(GET_PRINT_ARTICLES).fetchall()
+
+
+def mark_bullets_as_printed(db: Connection):
+    db.cursor().execute(MARK_BULLETS_PRINTED)
+    db.commit()

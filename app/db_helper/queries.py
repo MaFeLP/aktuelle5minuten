@@ -1,4 +1,5 @@
-CLEAN_ARTICLES = """DELETE FROM `articles`"""
+CLEAN_ARTICLES = """DELETE FROM `articles` WHERE date < datetime('now', '-1 month')"""
+CLEAN_PRINT_ARTICLES = """DELETE FROM `print_articles` WHERE created_at < datetime('now', '-1 month')"""
 
 INSERT_ARTICLES = """
 INSERT OR IGNORE INTO `articles`
@@ -61,4 +62,6 @@ VALUES
     (       ?,       ?)
 """
 
-GET_PRINT_ARTICLES = """SELECT category, bullets FROM `print_articles`"""
+GET_PRINT_ARTICLES = """SELECT category, bullets FROM `print_articles` WHERE printed = false"""
+
+MARK_BULLETS_PRINTED = """UPDATE `print_articles` SET printed = true"""

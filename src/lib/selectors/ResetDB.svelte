@@ -1,6 +1,6 @@
 <script lang="ts">
     async function showConfirmationDialog() {
-        if (window.confirm("Die Datenbank wirklich löschen?")) {
+        if (window.confirm("Artikel älter als einen Monat unwiderruflich löschen?")) {
             let res = await fetch("/clean");
             if (res.ok) {
                 let self = document.getElementById('btn-reset-db')!;
@@ -17,5 +17,5 @@
 </script>
 
 <button id="btn-reset-db" class="btn btn-danger" on:click={showConfirmationDialog}>
-    Aktuelle Datenbank löschen
+    Artikel älter als 1mo löschen
 </button>
