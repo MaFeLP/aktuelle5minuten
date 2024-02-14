@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "aktuelle5minuten"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
-authors = ["MaFeLP <60669873+MaFeLP@users.noreply.github.com>"]
+authors = ["MaFeLP <mafelp@proton.me>"]
 readme = "README.md"
 
 packages = [

@@ -9,6 +9,7 @@ docker run -d --rm \
     -p 8080:80 \
     -v ./data:/data:rw \
     ghcr.io/MaFeLP/aktuelle5minuten:latest
+```
 
 ## Build
 ```shell
