@@ -17,7 +17,9 @@ LIMIT 1
 
 GET_ARTICLE_KEY = """SELECT * FROM `articles` WHERE `key` = (?)"""
 
-GET_ARTICLES_CATEGORY = """SELECT title, description, content FROM `articles` WHERE `category` = (?)"""
+GET_ARTICLES_CATEGORY = (
+    """SELECT title, description, content FROM `articles` WHERE `category` = (?)"""
+)
 
 GET_CATEGORIES = """SELECT DISTINCT `category` FROM `articles` WHERE `status` = 1"""
 
@@ -58,3 +60,5 @@ INSERT INTO `print_articles`
 VALUES
     (       ?,       ?)
 """
+
+GET_PRINT_ARTICLES = """SELECT category, bullets FROM `print_articles`"""

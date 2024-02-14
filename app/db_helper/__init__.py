@@ -28,13 +28,23 @@ def clean(db: Connection):
 
 def demote_article(db: Connection, key: str):
     cursor = db.cursor()
-    cursor.execute(DEMOTE_ARTICLE, [key,])
+    cursor.execute(
+        DEMOTE_ARTICLE,
+        [
+            key,
+        ],
+    )
     db.commit()
 
 
 def mark_category_printed(db: Connection, category: str):
     cursor = db.cursor()
-    cursor.execute(MARK_CATEGORY_PRINTED, [category,])
+    cursor.execute(
+        MARK_CATEGORY_PRINTED,
+        [
+            category,
+        ],
+    )
     db.commit()
 
 
@@ -67,12 +77,21 @@ def get_article_from_key(db: Connection, app, key: str) -> dict | None:
 
 def get_categories(db: Connection) -> list:
     cursor = db.cursor()
-    return [row[0] for row in cursor.execute(GET_CATEGORIES).fetchall() if row[0] is not None]
+    return [
+        row[0]
+        for row in cursor.execute(GET_CATEGORIES).fetchall()
+        if row[0] is not None
+    ]
 
 
 def get_articles_from_category(db: Connection, category: str) -> list:
     cursor = db.cursor()
-    return cursor.execute(GET_ARTICLES_CATEGORY, [category,]).fetchall()
+    return cursor.execute(
+        GET_ARTICLES_CATEGORY,
+        [
+            category,
+        ],
+    ).fetchall()
 
 
 def get_first_article(db: Connection, app: Flask) -> dict | None:
@@ -107,12 +126,15 @@ def insert_articles(db: Connection, articles: list[dict]):
 
 
 def update_article_contents(db: Connection, article: dict[str, str]):
-    db.cursor().execute(INSERT_ARTICLE_CONTENT, (
-        article["kicker"],
-        article["description"],
-        article["content"]["plaintext"],
-        article["key"]
-    ))
+    db.cursor().execute(
+        INSERT_ARTICLE_CONTENT,
+        (
+            article["kicker"],
+            article["description"],
+            article["content"]["plaintext"],
+            article["key"],
+        ),
+    )
     db.commit()
 
 
@@ -128,3 +150,7 @@ def insert_bullets(db: Connection, category: str, bullets: str):
         abort(400)
     db.cursor().execute(INSERT_BULLETS, (category, bullets))
     db.commit()
+
+
+def get_print_articles(db: Connection) -> list:
+    return db.cursor().execute(GET_PRINT_ARTICLES).fetchall()

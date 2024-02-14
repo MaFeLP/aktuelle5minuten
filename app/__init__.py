@@ -1,15 +1,31 @@
+import datetime
 import os
-from flask import Flask, abort, send_from_directory, send_file, g, Response, redirect, request
+import tempfile
+import typst
+from flask import (
+    Flask,
+    abort,
+    send_from_directory,
+    send_file,
+    g,
+    Response,
+    redirect,
+    request,
+)
 from .db_helper import (
     get_db,
     insert_articles,
     update_article_contents,
     clean,
     get_article_from_key,
-    get_first_article, get_categories,
+    get_first_article,
+    get_categories,
     insert_bullets,
     promote_article as db_promote_article,
-    demote_article as db_demote_article, get_articles_from_category, mark_category_printed,
+    demote_article as db_demote_article,
+    get_articles_from_category,
+    mark_category_printed,
+    get_print_articles,
 )
 from .dlf import (
     download_article,
@@ -102,13 +118,52 @@ def add_article(ref: str):
 
 @app.route("/bullets", methods=["POST"])
 def add_bullets() -> Response:
-    if 'category' not in request.form or 'bullets' not in request.form:
+    def typst_escape(string: str) -> str:
+        string = string.replace("#", "\\#")
+        string = string.replace("\\", "\\\\")
+        string = string.replace("$", "\\$")
+        return string
+
+    if "category" not in request.form or "bullets" not in request.form:
         abort(406, "Category or Bullets missing")
 
-    category, bullets = request.form['category'], request.form['bullets']
+    category, bullets = typst_escape(request.form["category"]), typst_escape(
+        request.form["bullets"]
+    )
 
     insert_bullets(get_db(), category, bullets)
     mark_category_printed(get_db(), category)
+
+    # Handle: all categories converted to bullet points
+    if len(get_categories(get_db())) == 0:
+        today = datetime.datetime.now()
+        with tempfile.NamedTemporaryFile() as tmp:
+            tmp.write(
+                b"""#set document(author: "Max Ove Fehlinger", title: "Aktuelle 5 Minuten")
+#set page(numbering: "1", number-align: center)
+#set par(justify: true)
+#set text(font: "New Computer Modern", lang: "de")
+#show math.equation: set text(weight: 400)
+#show heading: set text(font: "New Computer Modern Sans")
+#set heading(numbering: "1.1")
+#align(center)[
+  #block(text(font: "New Computer Modern Sans", weight: 700, 1.75em, "Aktuelle 5 Minuten"))
+  #v(1em, weak: true)
+  #datetime.today().display("[day].[month].[year]") #sym.dash.em #strong("Max Ove Fehlinger")
+]
+
+"""
+            )
+
+            for category, bullets in get_print_articles(get_db()):
+                tmp.write(b"= " + str.encode(category) + b"\n")
+                tmp.write(str.encode(bullets) + b"\n")
+            tmp.flush()
+            typst.compile(
+                input=tmp.name,
+                output=f"{app.root_path}/pdfs/{today.strftime('%Y-%m-%d_%H:%M:%S')}.pdf",
+            )
+            return redirect(f"/files/{today.strftime('%Y-%m-%d_%H:%M:%S')}.pdf")
 
     return redirect("/pdfcreate")
 
@@ -127,8 +182,8 @@ def categories():
 @app.route("/chatgpt")
 def chatgpt():
     enabled = False
-    env = os.environ.get('ENABLE_CHATGPT', None)
-    if os.environ.get('ENABLE_CHATGPT', None) in ["1", "True", "TRUE", "true"]:
+    env = os.environ.get("ENABLE_CHATGPT", None)
+    if os.environ.get("ENABLE_CHATGPT", None) in ["1", "True", "TRUE", "true"]:
         enabled = True
     return {"enabled": enabled}
 
@@ -149,8 +204,12 @@ def get_articles_by_category(category: str):
 
 """
 
-        out = re.sub(r'Diese Nachricht wurde am \d{2}\.\d{2}\.\d{4} im Programm Deutschlandfunk gesendet\.', '', out)
-    
+        out = re.sub(
+            r"Diese Nachricht wurde am \d{2}\.\d{2}\.\d{4} im Programm Deutschlandfunk gesendet\.",
+            "",
+            out,
+        )
+
     return {
         "category": category,
         "text": out.strip(),

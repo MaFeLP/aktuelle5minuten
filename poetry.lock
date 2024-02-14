@@ -535,6 +535,26 @@ files = [
 ]
 
 [[package]]
+name = "typst"
+version = "0.10.0"
+description = "Python binding to typst"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "typst-0.10.0-cp37-abi3-macosx_10_12_x86_64.whl", hash = "sha256:f1d76e159df9500b3302bff5d0a65a0761c599693a9ae27d29115f74843ed935"},
+    {file = "typst-0.10.0-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:b325e25bcf29a6329c0482358e900210c54773097094f52ece80df230f9e2b0d"},
+    {file = "typst-0.10.0-cp37-abi3-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:2021b36ff65ca744b0f35f2e8a1280602fb41a4a5fc50d473dc8a06ac7852218"},
+    {file = "typst-0.10.0-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:77cdcb1b792d37ffd8a85e4f3232feeb39e90e9e63090ffeda4a516033c81530"},
+    {file = "typst-0.10.0-cp37-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:36eb489f68e647be8f17352ba4b967ccc3f6736d3723b50ec88a7bf055e1e475"},
+    {file = "typst-0.10.0-cp37-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:8573736bad80b5ce3e57c9bfeeb1e71760a25b66daf0d3f18a9a5da6278b6c95"},
+    {file = "typst-0.10.0-cp37-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:3f7dbe569e2c94cd253426a21cee55cca8e35f85071dd9a8ae3981baa4d560c7"},
+    {file = "typst-0.10.0-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fd991c41ff512b3c6d079f94888f549d1e4c145e7336f327c055b67627998e0e"},
+    {file = "typst-0.10.0-cp37-abi3-win32.whl", hash = "sha256:8fa407ff98d9f367c3ca7850d3fb4cd2e1dd43aeec3b6a174249074f2619b4fb"},
+    {file = "typst-0.10.0-cp37-abi3-win_amd64.whl", hash = "sha256:389364556a58fc470a1290eb12aa75e7f5e6f8137f3f3b558d7aa1f57ce5ad68"},
+    {file = "typst-0.10.0.tar.gz", hash = "sha256:37853d0938db054cfa9d00aa574d4eac2985af6e7396a59c521a76e9e6bdf020"},
+]
+
+[[package]]
 name = "urllib3"
 version = "2.2.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -571,4 +591,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "b6b9a658f366924ca999b1157c209270d6800c0fea08d34cd40c32aff732ffd1"
+content-hash = "3afd1e06848d840d9a3c93b29d77d0b5a4cd71a8b6d5cda4d8ec98ffb8f8fe22"

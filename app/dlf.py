@@ -104,15 +104,21 @@ def parse_article(html: str) -> dict[str, str]:
     figures: list[dict[str, str]] = []
     for figure in section.find_all("figure"):
         img: Tag = figure.img
-        figures.append({
-            "image": {
-                "src": img["src"],
-                "alt": img["alt"],
-                "srcset": img["srcset"],
-                "title": img["title"]
-            },
-            "caption": (figure.figcaption.text if figure.figcaption is not None else img["alt"]),
-        })
+        figures.append(
+            {
+                "image": {
+                    "src": img["src"],
+                    "alt": img["alt"],
+                    "srcset": img["srcset"],
+                    "title": img["title"],
+                },
+                "caption": (
+                    figure.figcaption.text
+                    if figure.figcaption is not None
+                    else img["alt"]
+                ),
+            }
+        )
         figure.decompose()
     for script in section.find_all("script"):
         script.decompose()
