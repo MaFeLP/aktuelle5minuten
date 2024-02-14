@@ -11,7 +11,7 @@
                 }
                 return res.json();
             })
-            .then((json) => {
+            .then((json: string[]) => {
                 console.debug("Received the file list:", json);
                 resolve(json);
             })

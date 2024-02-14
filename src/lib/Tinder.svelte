@@ -5,8 +5,7 @@
     import TinderCard from "./components/TinderCard.svelte";
     import Loading from "./components/Loading.svelte";
 
-    let articlePromise: Promise<any> | null = null;
-    const done = 'DONE';
+    let articlePromise: Promise<DlfArticle | 'DONE'> | null = null;
 
     let newArticle = () => {
         articlePromise = new Promise((resolve, reject) => {
@@ -15,7 +14,7 @@
                     if (!res.ok) {
                         if (res.status === 404) {
                             console.log("No tinders left!");
-                            resolve(done);
+                            resolve('DONE');
                         }
                         console.error("API response not ok!", res);
                         reject("API response not ok!");
@@ -38,19 +37,23 @@
 
 <main>
     <section class="content">
-        {#await articlePromise}
+        {#if articlePromise !== null}
+            {#await articlePromise}
+                <Loading />
+            {:then article}
+                {#if article === 'DONE'}
+                    <div class="alert alert-success">
+                        <h3 class="alert-heading">Keine Artikel zum Tindern in der Datenbank!</h3>
+                    </div>
+                {:else}
+                    <TinderCard article={article} newArticle={newArticle} />
+                {/if}
+            {:catch error}
+                <ErrorAlert error={error} body="Es ist ein Fehler beim Laden der Daten aufgetreten!" />
+            {/await}
+        {:else}
             <Loading />
-        {:then article}
-            {#if article === done}
-                <div class="alert alert-success">
-                    <h3 class="alert-heading">Keine Artikel zum Tindern in der Datenbank!</h3>
-                </div>
-            {:else}
-                <TinderCard article={article} newArticle={newArticle} />
-            {/if}
-        {:catch error}
-            <ErrorAlert error={error} body="Es ist ein Fehler beim Laden der Daten aufgetreten!" />
-        {/await}
+        {/if}
     </section>
 </main>
 

@@ -3,7 +3,7 @@
     import CreateCard from "./components/CreateCard.svelte";
     import Loading from "./components/Loading.svelte";
 
-    let categoryPromise = new Promise((resolve, reject) => {
+    let categoryPromise = new Promise<PrintCategory>((resolve, reject) => {
             fetch('/print_categories')
                 .then((res) => {
                     console.debug("Received print_categories response:", res);
@@ -14,13 +14,13 @@
 
                     return res.json()
                 })
-                .then((body) => {
-                    console.debug("print_categories JSON is", body);
-                    if (body.length < 1) {
+                .then((categories: string[]) => {
+                    console.debug("print_categories JSON is", categories);
+                    if (categories.length < 1) {
                         console.info("Not enough articles in category!")
                         reject("Nicht genug Artikel in dieser Kategorie!");
                     }
-                    return fetch(`/category/${body[0]}`);
+                    return fetch(`/category/${categories[0]}`);
                 })
                 .then((res) => {
                     console.debug("Received Category response:", res);
@@ -31,7 +31,7 @@
 
                     return res.json()
                 })
-                .then((json) => {
+                .then((json: PrintCategory) => {
                     console.debug("Category Content:", json);
                     resolve(json);
                 })
@@ -49,9 +49,11 @@
         {#await categoryPromise}
             <Loading />
         {:then category}
-            <CreateCard title="{category['category']}" content="{category['text']}" />
+            <CreateCard title="{category.category}" content="{category.text}" />
 
+            <!--
             <code>{JSON.stringify(category)}</code>
+            -->
         {:catch err}
             <div>Error!</div>
             <code>{err}</code>

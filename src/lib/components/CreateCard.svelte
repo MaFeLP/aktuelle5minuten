@@ -6,15 +6,15 @@
     export let title: string;
     export let content: string;
 
-    let chatGPTEnabledPromise = new Promise((resolve, reject) => {
+    let chatGPTEnabledPromise = new Promise<boolean>((resolve, reject) => {
         fetch("/chatgpt")
             .then((res) => {
                 console.debug("Received response for ChatGPT button", res);
                 return res.json();
             })
-            .then((json) => {
+            .then((json: ChatGPTEnabled) => {
                 console.debug("ChatGPT button is enabled?", json);
-                resolve(json['enabled']);
+                resolve(json.enabled);
             })
             .catch((err) => {
                 console.error("Could not fetch the ChatGPT status", err);
