@@ -1,19 +1,39 @@
 <script lang="ts">
-    async function loadNew() {
-        let res = await fetch('/load');
-        console.debug(res);
-        if (res.ok) {
-            let self = document.getElementById('btn-load-new')!;
-            self.classList.replace('btn-outline-primary', 'btn-outline-success');
-            self.classList.add('disabled');
-            self.innerText = self.innerText + ' ✅';
-            console.info("New articles imported into database");
-        } else {
-            alert("Fehler! Neue Artikel konnten nicht importiert werden!");
-        }
+    let show: 'normal' | 'loading' | 'done' = 'normal';
+
+    function loadNew() {
+        show = 'loading';
+
+        fetch('/load')
+            .then((res) => {
+                if (res.ok) {
+                    console.info("New articles imported into database");
+                } else {
+                    show = 'normal';
+                    alert("Fehler! Neue Artikel konnten nicht importiert werden!");
+                    console.error("New articles loaded into the database", res);
+                }
+            })
+            .catch((err) => {
+                show = 'normal';
+                alert("Fehler! Neue Artikel konnten nicht importiert werden!");
+                console.error("Could not load new articles into the database!", err);
+            });
     }
 </script>
 
-<button id="btn-load-new" class="btn btn-outline-primary" on:click={loadNew}>
-    Neue Artikel laden
-</button>
+{#if show === 'loading'}
+    <button id="btn-load-new" class="btn btn-outline-success disabled">
+        <span role="status">Artikel geladen!</span>
+        <i class="bi bi-check2-square" />
+    </button>
+{:else if show === 'done'}
+    <button id="btn-load-new" class="btn btn-outline-primary disabled">
+        <span role="status">Laden... </span>
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+    </button>
+{:else}
+    <button id="btn-load-new" class="btn btn-outline-primary" on:click={loadNew}>
+        Neue Artikel laden
+    </button>
+{/if}

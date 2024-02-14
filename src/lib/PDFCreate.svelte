@@ -1,9 +1,9 @@
 <script lang="ts">
     import NavBar from "./NavBar.svelte";
     import CreateCard from "./components/CreateCard.svelte";
+    import Loading from "./components/Loading.svelte";
 
-    function nextCategory() {
-        return new Promise((resolve, reject) => {
+    let categoryPromise = new Promise((resolve, reject) => {
             fetch('/print_categories')
                 .then((res) => {
                     console.debug("Received print_categories response:", res);
@@ -40,9 +40,6 @@
                     reject("Fehler beim Verarbeiten der Daten!");
                 });
         });
-    }
-
-    let categoryPromise = nextCategory();
 </script>
 
 <NavBar title="PDF Erstellen" />
@@ -50,9 +47,9 @@
 <main>
     <section>
         {#await categoryPromise}
-            <small class="text-muted">Laden...</small>
+            <Loading />
         {:then category}
-            <CreateCard title="{category['category']}" content="{category['text']}" nextCategory="{nextCategory}" />
+            <CreateCard title="{category['category']}" content="{category['text']}" />
 
             <code>{JSON.stringify(category)}</code>
         {:catch err}

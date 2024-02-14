@@ -3,12 +3,35 @@
     import '../assets/dlf.sass';
     import ErrorAlert from "./components/ErrorAlert.svelte";
     import TinderCard from "./components/TinderCard.svelte";
+    import Loading from "./components/Loading.svelte";
 
-    let articlePromise = fetch("/article");
+    let articlePromise: Promise<any> | null = null;
+    const done = 'DONE';
 
     let newArticle = () => {
-        articlePromise = fetch("/article");
+        articlePromise = new Promise((resolve, reject) => {
+            fetch("/article")
+                .then((res) => {
+                    if (!res.ok) {
+                        if (res.status === 404) {
+                            console.log("No tinders left!");
+                            resolve(done);
+                        }
+                        console.error("API response not ok!", res);
+                        reject("API response not ok!");
+                    }
+                    return res.json();
+                })
+                .then((json) => {
+                    resolve(json);
+                })
+                .catch((err) => {
+                    console.error("Error processing '/article/!", err)
+                });
+        });
     }
+
+    newArticle();
 </script>
 
 <NavBar title="Nachrichten Tinder" />
@@ -16,20 +39,14 @@
 <main>
     <section class="content">
         {#await articlePromise}
-            <small class="text-muted">Laden...</small>
-        {:then articleResponse}
-            {#if articleResponse.ok}
-                {#await articleResponse.json()}
-                    <small class="text-muted">Verarbeiten...</small>
-                {:then article}
-                    <TinderCard article={article} newArticle={newArticle} />
-                {:catch error}
-                    <ErrorAlert error={error} body="Es ist ein Fehler beim Verarbeiten der Daten aufgetreten!" />
-                {/await}
-            {:else if articleResponse.status === 404}
+            <Loading />
+        {:then article}
+            {#if article === done}
                 <div class="alert alert-success">
                     <h3 class="alert-heading">Keine Artikel zum Tindern in der Datenbank!</h3>
                 </div>
+            {:else}
+                <TinderCard article={article} newArticle={newArticle} />
             {/if}
         {:catch error}
             <ErrorAlert error={error} body="Es ist ein Fehler beim Laden der Daten aufgetreten!" />
