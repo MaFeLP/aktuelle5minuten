@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory, send_file, g, Response
+from flask import Flask, abort, send_from_directory, send_file, g, Response, redirect, request
 from .db_helper import (
     get_db,
     insert_articles,
@@ -7,8 +7,9 @@ from .db_helper import (
     clean,
     get_article_from_key,
     get_first_article, get_categories,
+    insert_bullets,
     promote_article as db_promote_article,
-    demote_article as db_demote_article,
+    demote_article as db_demote_article, get_articles_from_category, mark_category_printed,
 )
 from .dlf import (
     download_article,
@@ -17,6 +18,7 @@ from .dlf import (
     parse_wochenrueckblick,
     PREFIX as DLF_PREFIX,
 )
+import re
 
 _DEFAULT_CATEGORIES = [
     "Aktuelles Ereignis",
@@ -76,8 +78,6 @@ def first_article():
     article = get_first_article(get_db(), app)
     if article is None:
         return Response("No articles found", 404)
-    if article["contents"] is not None:
-        return article
     html = download_article(DLF_PREFIX + article["href"])
     parsed = parse_article(html)
     update_article_contents(get_db(), parsed)
@@ -100,6 +100,19 @@ def add_article(ref: str):
     return Response("Created", 201)
 
 
+@app.route("/bullets", methods=["POST"])
+def add_bullets() -> Response:
+    if 'category' not in request.form or 'bullets' not in request.form:
+        abort(406, "Category or Bullets missing")
+
+    category, bullets = request.form['category'], request.form['bullets']
+
+    insert_bullets(get_db(), category, bullets)
+    mark_category_printed(get_db(), category)
+
+    return redirect("/pdfcreate")
+
+
 @app.route("/categories")
 def categories():
     db_categories = get_categories(get_db())
@@ -109,6 +122,39 @@ def categories():
         if category not in db_categories:
             db_categories.append(category)
     return sorted(db_categories)
+
+
+@app.route("/chatgpt")
+def chatgpt():
+    enabled = False
+    env = os.environ.get('ENABLE_CHATGPT', None)
+    if os.environ.get('ENABLE_CHATGPT', None) in ["1", "True", "TRUE", "true"]:
+        enabled = True
+    return {"enabled": enabled}
+
+
+@app.route("/print_categories")
+def print_categories():
+    return sorted(get_categories(get_db()))
+
+
+@app.route("/category/<string:category>")
+def get_articles_by_category(category: str):
+    results = get_articles_from_category(get_db(), category)
+    out = ""
+    for result in results:
+        out += f"""# {result[0]}
+{result[1]}
+{result[2]}
+
+"""
+
+        out = re.sub(r'Diese Nachricht wurde am \d{2}\.\d{2}\.\d{4} im Programm Deutschlandfunk gesendet\.', '', out)
+    
+    return {
+        "category": category,
+        "text": out.strip(),
+    }
 
 
 @app.route("/clean")

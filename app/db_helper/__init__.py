@@ -32,6 +32,12 @@ def demote_article(db: Connection, key: str):
     db.commit()
 
 
+def mark_category_printed(db: Connection, category: str):
+    cursor = db.cursor()
+    cursor.execute(MARK_CATEGORY_PRINTED, [category,])
+    db.commit()
+
+
 def _article_from_db_result(row: tuple):
     return {
         "key": row[0],
@@ -62,6 +68,11 @@ def get_article_from_key(db: Connection, app, key: str) -> dict | None:
 def get_categories(db: Connection) -> list:
     cursor = db.cursor()
     return [row[0] for row in cursor.execute(GET_CATEGORIES).fetchall() if row[0] is not None]
+
+
+def get_articles_from_category(db: Connection, category: str) -> list:
+    cursor = db.cursor()
+    return cursor.execute(GET_ARTICLES_CATEGORY, [category,]).fetchall()
 
 
 def get_first_article(db: Connection, app: Flask) -> dict | None:
@@ -109,4 +120,11 @@ def promote_article(db: Connection, key: str, category: str):
     if len(category) > 63:
         abort(400)
     db.cursor().execute(PROMOTE_ARTICLE, (key, category))
+    db.commit()
+
+
+def insert_bullets(db: Connection, category: str, bullets: str):
+    if len(category) > 63:
+        abort(400)
+    db.cursor().execute(INSERT_BULLETS, (category, bullets))
     db.commit()

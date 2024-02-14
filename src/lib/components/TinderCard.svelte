@@ -31,14 +31,16 @@
 </script>
 
 <div id="tinder-card" class="card">
-    <img
-            class="card-img-top"
-            loading="lazy"
-            src="{article['figures'][0]['image']['src']}"
-            alt="{article['figures'][0]['image']['alt']}"
-            srcset="{article['figures'][0]['image']['srcset']}"
-            title="{article['figures'][0]['image']['title']}"
-    />
+    {#if article['figures'] !== undefined}
+        <img
+                class="card-img-top"
+                loading="lazy"
+                src="{article['figures'][0]['image']['src']}"
+                alt="{article['figures'][0]['image']['alt']}"
+                srcset="{article['figures'][0]['image']['srcset']}"
+                title="{article['figures'][0]['image']['title']}"
+        />
+    {/if}
     <div class="card-body">
         <h5 class="card-title">{article["kicker"]} - {article["title"]}</h5>
         <small class="card-subtitle">
