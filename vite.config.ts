@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [svelte()],
   server: {
     proxy: {
-      '^/(article.*|add|bullets|categor*|chatgpt|clean|files|load|demote|promote|print_categories)': {
+      '^/(article.*|add|bullets|categor*|chatgpt|clean|count|files|load|demote|promote|print_categories)': {
         target: 'http://localhost:5000/'
       }
     }

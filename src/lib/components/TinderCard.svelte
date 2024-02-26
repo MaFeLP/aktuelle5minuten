@@ -38,7 +38,7 @@
 </script>
 
 <div id="tinder-card" class="card">
-    {#if article.figures !== undefined}
+    {#if article.figures[0] !== undefined}
         <img
                 class="card-img-top"
                 loading="lazy"

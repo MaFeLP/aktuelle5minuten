@@ -42,3 +42,8 @@ type ChatGPTEnabled = {
      */
     enabled: boolean,
 };
+
+type Progress = {
+    articles: number,
+    categories: number,
+};

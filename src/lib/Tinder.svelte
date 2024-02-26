@@ -4,8 +4,29 @@
     import ErrorAlert from "./components/ErrorAlert.svelte";
     import TinderCard from "./components/TinderCard.svelte";
     import Loading from "./components/Loading.svelte";
+    import TinderProgress from "./components/TinderProgress.svelte";
 
     let articlePromise: Promise<DlfArticle | 'DONE'> | null = null;
+    let counter = 0;
+    let maxCounterPromise: Promise<number> = new Promise<number>((resolve, reject) => {
+        fetch("/count")
+            .then((res) => {
+                if (!res.ok) {
+                    console.error("Could not load progress count!", res);
+                    reject("Could not load progress count!");
+                }
+                return res.json()
+            })
+            .then((progress: Progress) => {
+                console.debug("Received progress status:", progress);
+                resolve(progress.articles);
+            })
+            .catch((err) => {
+                console.error("Something went wrong processing the progress.", err);
+                reject(err);
+            });
+
+    });
 
     let newArticle = () => {
         articlePromise = new Promise((resolve, reject) => {
@@ -22,6 +43,8 @@
                     return res.json();
                 })
                 .then((json) => {
+                    // Increment counter
+                    counter += 1;
                     resolve(json);
                 })
                 .catch((err) => {
@@ -46,6 +69,7 @@
                         <h3 class="alert-heading">Keine Artikel zum Tindern in der Datenbank!</h3>
                     </div>
                 {:else}
+                    <TinderProgress counter={counter} progressPromise={maxCounterPromise} />
                     <TinderCard article={article} newArticle={newArticle} />
                 {/if}
             {:catch error}

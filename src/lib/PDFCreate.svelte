@@ -2,6 +2,7 @@
     import NavBar from "./NavBar.svelte";
     import CreateCard from "./components/CreateCard.svelte";
     import Loading from "./components/Loading.svelte";
+    import CreateProgress from "./components/CreateProgress.svelte";
 
     let categoryPromise = new Promise<PrintCategory>((resolve, reject) => {
             fetch('/print_categories')
@@ -49,6 +50,7 @@
         {#await categoryPromise}
             <Loading />
         {:then category}
+            <CreateProgress />
             <CreateCard title="{category.category}" content="{category.text}" />
 
             <!--

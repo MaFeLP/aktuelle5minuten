@@ -27,6 +27,13 @@ def clean(db: Connection):
     db.commit()
 
 
+def count(db: Connection):
+    cursor = db.cursor()
+    articles = cursor.execute(COUNT_ARTICLES).fetchone()[0]
+    categories = cursor.execute(COUNT_CATEGORIES).fetchone()[0]
+    return {"articles": articles, "categories": categories}
+
+
 def demote_article(db: Connection, key: str):
     cursor = db.cursor()
     cursor.execute(

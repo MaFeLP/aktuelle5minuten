@@ -17,6 +17,7 @@ from .db_helper import (
     insert_articles,
     update_article_contents,
     clean,
+    count,
     get_article_from_key,
     get_first_article,
     get_categories,
@@ -119,9 +120,9 @@ def add_article(ref: str):
 @app.route("/bullets", methods=["POST"])
 def add_bullets() -> Response:
     def typst_escape(string: str) -> str:
-        string = string.replace("#", "\\#")
-        string = string.replace("\\", "\\\\")
-        string = string.replace("$", "\\$")
+        string = string.replace("#", r"\#")
+        string = string.replace("\\", r"\\")
+        string = string.replace("$", r"\$")
         return string
 
     if "category" not in request.form or "bullets" not in request.form:
@@ -183,7 +184,6 @@ def categories():
 @app.route("/chatgpt")
 def chatgpt():
     enabled = False
-    env = os.environ.get("ENABLE_CHATGPT", None)
     if os.environ.get("ENABLE_CHATGPT", None) in ["1", "True", "TRUE", "true"]:
         enabled = True
     return {"enabled": enabled}
@@ -221,6 +221,11 @@ def get_articles_by_category(category: str):
 def clean_articles():
     clean(get_db())
     return Response("Database cleared", 200)
+
+
+@app.route("/count")
+def count_articles():
+    return count(get_db())
 
 
 @app.route("/files")
