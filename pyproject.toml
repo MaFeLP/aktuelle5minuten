@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "aktuelle5minuten"
-version = "1.0.0"
-description = ""
+version = "1.0.1"
+description = "Semi-automatische PDF-Erstellung mit den News der letzten Woche vom Deutschlandfunk "
 authors = ["MaFeLP <mafelp@proton.me>"]
 readme = "README.md"
 
