@@ -29,9 +29,7 @@ def download_wochenrueckblick() -> str:
 
 
 def _parse_partial_article(script: Tag) -> dict | None:
-    j = json.loads(script["data-json"])
-    key = j["key"]
-    j = j["value"]
+    j = json.loads(script["data-json"])["value"]
 
     if "__typename" not in j:
         if "data" in j and "newsByWeek" in j["data"]:
@@ -45,14 +43,15 @@ def _parse_partial_article(script: Tag) -> dict | None:
 
     if j["__typename"] == "Teaser" and j["path"] not in _NON_ARTICLES_URLS:
         _LOGGER.info(f"  -> Found Article '{j['title']}'")
+        if not j["path"].startswith(PREFIX):
+            return None
         return {
-            "key": key,
+            "key": j["path"][len(PREFIX):],
             "title": j["title"],
             "teaserHeadline": j["teaserHeadline"],
             "teaserText": j["teasertext"],
             "date": j["firstPublicationDate"],
             "localeDate": j["dateLocalizedFormatted"],
-            "href": j["path"],
         }
     else:
         _LOGGER.debug(f"Not a Teaser/News Article: {j}")

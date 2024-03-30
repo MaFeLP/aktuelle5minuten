@@ -1,12 +1,11 @@
 CREATE TABLE IF NOT EXISTS 'articles' (
     -- Data extracted from wochenuberblick
-    key varchar(63) UNIQUE NOT NULL PRIMARY KEY,
+    key varchar(255) UNIQUE NOT NULL PRIMARY KEY,
     title text NOT NULL,
     teaserHeadline text NOT NULL,
     teaserText text NOT NULL,
     date timestamp NOT NULL,
     localeDate text NOT NULL,
-    href text NOT NULL,
 
     -- Data from the full article
     kicker text DEFAULT NULL,

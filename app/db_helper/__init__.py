@@ -64,12 +64,11 @@ def _article_from_db_result(row: tuple):
         "teaserText": row[3],
         "date": row[4],
         "localeDate": row[5],
-        "href": row[6],
-        "kicker": row[7],
-        "description": row[8],
-        "content": row[9],
-        "category": row[10],
-        "status": row[11],
+        "kicker": row[6],
+        "description": row[7],
+        "content": row[8],
+        "category": row[9],
+        "status": row[10],
     }
 
 
@@ -116,10 +115,6 @@ def insert_articles(db: Connection, articles: list[dict]):
     cursor = db.cursor()
     non_articles = []
     for article in articles:
-        href = article["href"]
-        if not href.startswith(DLF_PREFIX):
-            non_articles.append(href)
-        href = href[len(DLF_PREFIX) :]
         key = article["key"]
         title = article["title"]
         teaser_headline = article["teaserHeadline"]
@@ -127,7 +122,7 @@ def insert_articles(db: Connection, articles: list[dict]):
         date = article["date"]
         locale_date = article["localeDate"]
 
-        elements = (key, title, teaser_headline, teaser_text, date, locale_date, href)
+        elements = (key, title, teaser_headline, teaser_text, date, locale_date)
 
         cursor.execute(INSERT_ARTICLES, elements)
     db.commit()
@@ -167,3 +162,4 @@ def get_print_articles(db: Connection) -> list:
 def mark_bullets_as_printed(db: Connection):
     db.cursor().execute(MARK_BULLETS_PRINTED)
     db.commit()
+

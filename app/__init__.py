@@ -95,7 +95,7 @@ def first_article():
     article = get_first_article(get_db(), app)
     if article is None:
         return Response("No articles found", 404)
-    html = download_article(DLF_PREFIX + article["href"])
+    html = download_article(DLF_PREFIX + article["key"])
     parsed = parse_article(html)
     update_article_contents(get_db(), parsed)
     return parsed

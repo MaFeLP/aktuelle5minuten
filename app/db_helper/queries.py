@@ -6,9 +6,9 @@ COUNT_CATEGORIES = """SELECT COUNT(DISTINCT category) FROM articles WHERE status
 
 INSERT_ARTICLES = """
 INSERT OR IGNORE INTO `articles`
-    (key, title, teaserHeadline, teaserText, date, localeDate, href)
+    (key, title, teaserHeadline, teaserText, date, localeDate)
 VALUES
-    (  ?,     ?,              ?,          ?,    ?,          ?,    ?)
+    (  ?,     ?,              ?,          ?,    ?,          ?)
 """
 
 FIRST_ARTICLE = """
