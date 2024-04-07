@@ -4,42 +4,16 @@
     import Loading from "./components/Loading.svelte";
     import CreateProgress from "./components/CreateProgress.svelte";
 
-    let categoryPromise = new Promise<PrintCategory>((resolve, reject) => {
-            fetch('/print_categories')
-                .then((res) => {
-                    console.debug("Received print_categories response:", res);
-                    if (!res.ok) {
-                        console.error(res);
-                        reject("API hat nicht 'OK' zurückgegeben!");
-                    }
+    import { CategoryApi } from "../api-client";
 
-                    return res.json()
-                })
-                .then((categories: string[]) => {
-                    console.debug("print_categories JSON is", categories);
-                    if (categories.length < 1) {
-                        console.info("Not enough articles in category!")
-                        reject("Nicht genug Artikel in dieser Kategorie!");
-                    }
-                    return fetch(`/category/${categories[0]}`);
-                })
-                .then((res) => {
-                    console.debug("Received Category response:", res);
-                    if (!res.ok) {
-                        console.error("API error (#2):", res);
-                        reject("API hat nicht 'OK' zurückgegeben! (#2)");
-                    }
-
-                    return res.json()
-                })
-                .then((json: PrintCategory) => {
-                    console.debug("Category Content:", json);
-                    resolve(json);
-                })
-                .catch((err) => {
-                    console.error("Fehler beim Verarbeiten der Daten!", err);
-                    reject("Fehler beim Verarbeiten der Daten!");
-                });
+    const categoryApi = new CategoryApi();
+    let categoryPromise = categoryApi.getAll({print: true})
+        .then((categories) => {
+            if (categories.length < 1) {
+                console.info("Not enough articles in category!");
+                window.location.href = "/";
+            }
+            return categoryApi.summary({category: categories[0]});
         });
 </script>
 
@@ -50,12 +24,9 @@
         {#await categoryPromise}
             <Loading />
         {:then category}
+
             <CreateProgress />
             <CreateCard title="{category.category}" content="{category.text}" />
-
-            <!--
-            <code>{JSON.stringify(category)}</code>
-            -->
         {:catch err}
             <div>Error!</div>
             <code>{err}</code>

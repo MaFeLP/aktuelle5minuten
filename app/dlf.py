@@ -46,7 +46,7 @@ def _parse_partial_article(script: Tag) -> dict | None:
         if not j["path"].startswith(PREFIX):
             return None
         return {
-            "key": j["path"][len(PREFIX):],
+            "key": j["path"][len(PREFIX) :],
             "title": j["title"],
             "teaserHeadline": j["teaserHeadline"],
             "teaserText": j["teasertext"],

@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "generate": "openapi-generator-cli generate -g typescript-fetch -i apispec.yaml -o src/api-client && sed -i -E 's|export const BASE_PATH.*$|export const BASE_PATH = \"/\";|g' src/api-client/runtime.ts"
   },
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.13.1",
     "@sveltejs/vite-plugin-svelte": "^3.0.2",
     "@tsconfig/svelte": "^5.0.4",
     "@types/bootstrap": "^5.2.10",

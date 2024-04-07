@@ -1,7 +1,8 @@
 <script lang="ts">
     import ErrorAlert from "./ErrorAlert.svelte";
+    import type { Count } from "../../api-client";
 
-    export let progressPromise: Promise<number>;
+    export let progressPromise: Promise<Count>;
 
     export let counter: number;
 </script>
@@ -11,18 +12,18 @@
         <span role="status">Laden...</span>
         <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
     </div>
-{:then maxArticles}
+{:then maxCounter}
     <div class="progress"
          role="progressbar"
          aria-label="Tinder Progress"
          aria-valuenow="{counter}"
          aria-valuemin="0"
-         aria-valuemax="{maxArticles}"
+         aria-valuemax="{maxCounter.articles}"
     >
         <div class="progress-bar overflow-visible text-dark bg-info"
-            style="width: {Math.round((counter / maxArticles) * 100)}%"
+            style="width: {Math.round((counter / maxCounter.articles) * 100)}%"
         >
-            {counter}/{maxArticles}
+            {counter}/{maxCounter.articles}
         </div>
     </div>
 {:catch err}

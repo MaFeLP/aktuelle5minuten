@@ -1,25 +1,10 @@
 <script lang="ts">
     import NavBar from "./NavBar.svelte";
     import Loading from "./components/Loading.svelte";
+    import { FilesApi } from "../api-client";
 
-    let filesPromise = new Promise<string[]>((resolve, reject) => {
-        fetch("/files")
-            .then((res) => {
-                if (!res.ok) {
-                    console.error("Could not load PDF files!", res);
-                    reject("API is not ok!");
-                }
-                return res.json();
-            })
-            .then((json: string[]) => {
-                console.debug("Received the file list:", json);
-                resolve(json);
-            })
-            .catch((err) => {
-                console.error("Retrieving files list failed!", err);
-                reject(err);
-            });
-    });
+    const filesApi = new FilesApi();
+    let filesPromise = filesApi.list();
 </script>
 
 <NavBar title="PDF Dateien" />

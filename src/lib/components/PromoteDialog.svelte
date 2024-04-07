@@ -1,5 +1,8 @@
 <script lang="ts">
     import ErrorAlert from "./ErrorAlert.svelte";
+    import {CategoryApi} from "../../api-client";
+
+    const categoriesApi = new CategoryApi();
 
     export let promote: (category: string) => Promise<void>;
 
@@ -14,24 +17,7 @@
         }
     }
 
-    let categoriesRequest = new Promise<string[]>((resolve, reject) => {
-        fetch("/categories")
-            .then((res) => {
-                if (!res.ok) {
-                    console.error("Error loading categories!", res);
-                    reject("Error loading categories!");
-                }
-                return res.json();
-            })
-            .then((categories: string[]) => {
-                console.debug("Received categories:", categories);
-                resolve(categories);
-            })
-            .catch((err) => {
-                console.error("Could not load categories!", err);
-                reject(err);
-            });
-    });
+    let categoriesPromise = categoriesApi.getAll({print: false});
 </script>
 
 <dialog id="promote-dialog" on:submit={onSubmit}>
@@ -52,7 +38,7 @@
                     minlength="1"
                     maxlength="63"
             >
-            {#await categoriesRequest}
+            {#await categoriesPromise}
                 <small class="text-muted hidden">Kategorien werden geladen...</small>
             {:then categories}
                 <datalist id="categories-options">

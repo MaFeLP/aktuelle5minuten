@@ -1,19 +1,17 @@
 <script lang="ts">
+    import {ActionsApi} from "../../api-client";
+
     let show: 'normal' | 'loading' | 'done' = 'normal';
+
+    const actionsApi = new ActionsApi();
 
     function showConfirmationDialog() {
         if (window.confirm("Artikel älter als einen Monat unwiderruflich löschen?")) {
             show = 'loading';
 
-            fetch('/clean')
-                .then((res) => {
-                    if (res.ok) {
-                        console.info("New articles imported into database");
-                    } else {
-                        show = 'normal';
-                        alert("Fehler! Neue Artikel konnten nicht importiert werden!");
-                        console.error("New articles loaded into the database", res);
-                    }
+            actionsApi.clean()
+                .then(() => {
+                    console.info("New articles imported into database");
                 })
                 .catch((err) => {
                     show = 'normal';

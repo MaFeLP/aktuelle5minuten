@@ -1,5 +1,7 @@
 CLEAN_ARTICLES = """DELETE FROM `articles` WHERE date < datetime('now', '-1 month')"""
-CLEAN_PRINT_ARTICLES = """DELETE FROM `print_articles` WHERE created_at < datetime('now', '-1 month')"""
+CLEAN_PRINT_ARTICLES = (
+    """DELETE FROM `print_articles` WHERE created_at < datetime('now', '-1 month')"""
+)
 
 COUNT_ARTICLES = """SELECT COUNT(*) FROM articles WHERE status = 0"""
 COUNT_CATEGORIES = """SELECT COUNT(DISTINCT category) FROM articles WHERE status = 1"""
@@ -65,6 +67,8 @@ VALUES
     (       ?,       ?)
 """
 
-GET_PRINT_ARTICLES = """SELECT category, bullets FROM `print_articles` WHERE printed = false"""
+GET_PRINT_ARTICLES = (
+    """SELECT category, bullets FROM `print_articles` WHERE printed = false"""
+)
 
 MARK_BULLETS_PRINTED = """UPDATE `print_articles` SET printed = true"""

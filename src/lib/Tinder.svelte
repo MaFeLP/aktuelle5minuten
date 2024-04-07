@@ -5,51 +5,23 @@
     import TinderCard from "./components/TinderCard.svelte";
     import Loading from "./components/Loading.svelte";
     import TinderProgress from "./components/TinderProgress.svelte";
+    import {type Article, ArticleApi, StatusApi} from "../api-client";
 
-    let articlePromise: Promise<DlfArticle | 'DONE'> | null = null;
+    const articleApi = new ArticleApi();
+    const statusApi = new StatusApi();
+
+    let articlePromise: Promise<Article | 'DONE'> | null = null;
     let counter = 0;
-    let maxCounterPromise: Promise<number> = new Promise<number>((resolve, reject) => {
-        fetch("/count")
-            .then((res) => {
-                if (!res.ok) {
-                    console.error("Could not load progress count!", res);
-                    reject("Could not load progress count!");
-                }
-                return res.json()
-            })
-            .then((progress: Progress) => {
-                console.debug("Received progress status:", progress);
-                resolve(progress.articles);
-            })
-            .catch((err) => {
-                console.error("Something went wrong processing the progress.", err);
-                reject(err);
-            });
-
-    });
+    let maxCounterPromise = statusApi.count();
 
     let newArticle = () => {
         articlePromise = new Promise((resolve, reject) => {
-            fetch("/article")
-                .then((res) => {
-                    if (!res.ok) {
-                        if (res.status === 404) {
-                            console.log("No tinders left!");
-                            resolve('DONE');
-                        }
-                        console.error("API response not ok!", res);
-                        reject("API response not ok!");
-                    }
-                    return res.json();
+            articleApi.getFirst()
+                .then((article) => { resolve(article )})
+                .catch((res) => {
+                    console.error("API response not ok!", res);
+                    reject("API response not ok!");
                 })
-                .then((json) => {
-                    // Increment counter
-                    counter += 1;
-                    resolve(json);
-                })
-                .catch((err) => {
-                    console.error("Error processing '/article/!", err)
-                });
         });
     }
 
@@ -73,7 +45,7 @@
                     <TinderCard article={article} newArticle={newArticle} />
                 {/if}
             {:catch error}
-                <ErrorAlert error={error} body="Es ist ein Fehler beim Laden der Daten aufgetreten!" />
+                <ErrorAlert error={error} body="Es ist ein Fehler beim Laden der Daten aufgetreten! Dies kann daran liegen, dass keine Artikel mehr zum tindern in der Datenbank sind oder ein interner Fehler aufgetreten ist." />
             {/await}
         {:else}
             <Loading />

@@ -144,7 +144,7 @@ def update_article_contents(db: Connection, article: dict[str, str]):
 def promote_article(db: Connection, key: str, category: str):
     if len(category) > 63:
         abort(400)
-    db.cursor().execute(PROMOTE_ARTICLE, (key, category))
+    db.cursor().execute(PROMOTE_ARTICLE, (category, key))
     db.commit()
 
 
@@ -162,4 +162,3 @@ def get_print_articles(db: Connection) -> list:
 def mark_bullets_as_printed(db: Connection):
     db.cursor().execute(MARK_BULLETS_PRINTED)
     db.commit()
-

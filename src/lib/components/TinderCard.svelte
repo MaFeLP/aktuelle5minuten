@@ -1,32 +1,31 @@
 <script lang="ts">
     import PromoteDialog from "./PromoteDialog.svelte";
+    import {type Article, ArticleApi} from "../../api-client";
+
+    const articleApi = new ArticleApi();
 
     export let newArticle: () => void;
 
-    export let article: DlfArticle;
+    export let article: Article;
 
     async function promote(category: string) {
         console.debug("Promoting article", article)
-        let response = await fetch(`/promote/${category}/${article.key}`);
-        console.debug("Response from promoting the article", response)
-        if (response.ok) {
-            newArticle();
-        } else {
-            console.error("Could not demote article:", article, response);
-            alert("Something went wrong, while demoting the article!");
-        }
+        articleApi.promote({category: category, key: article.key})
+            .then(() => newArticle())
+            .catch((err) => {
+                console.error("Could not promote article:", article, err);
+                alert("Something went wrong, while promoting the article!");
+            })
     }
 
     async function demote() {
         console.debug("Demoting article", article)
-        let response = await fetch(`/demote/${article.key}`);
-        console.debug("Response from demoting the article", response)
-        if (response.ok) {
-            newArticle();
-        } else {
-            console.error("Could not demote article:", article, response);
-            alert("Something went wrong, while demoting the article!");
-        }
+        articleApi.demote({key: article.key})
+            .then(() => newArticle())
+            .catch((err) => {
+                console.error("Could not demote article:", article, err);
+                alert("Something went wrong, while demoting the article!");
+            })
     }
 
     function openDialog() {

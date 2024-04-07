@@ -1,26 +1,16 @@
 <script lang="ts">
     import chatGPTIcon from '/icon-chatgpt.svg';
+    import claudeIcon from '/claude_app_icon.png';
+    import {StatusApi} from "../../api-client";
 
     const PROMPT = "Fasse folgende Artikel in kurzen Stichpunkten zusammen. Lasse unwichtige Informationen aus.\n\n";
+
+    const statusApi = new StatusApi();
 
     export let title: string;
     export let content: string;
 
-    let chatGPTEnabledPromise = new Promise<boolean>((resolve, reject) => {
-        fetch("/chatgpt")
-            .then((res) => {
-                console.debug("Received response for ChatGPT button", res);
-                return res.json();
-            })
-            .then((json: ChatGPTEnabled) => {
-                console.debug("ChatGPT button is enabled?", json);
-                resolve(json.enabled);
-            })
-            .catch((err) => {
-                console.error("Could not fetch the ChatGPT status", err);
-                reject(err);
-            })
-    });
+    let aiEnabledPromise = statusApi.ai();
 
     let bulletsCopied = false;
     let bulletsPasted = false;
@@ -72,12 +62,17 @@
                 {/if}
             </button>
             <span class="flex-fill" />
-            {#await chatGPTEnabledPromise}
+            {#await aiEnabledPromise}
                 <span class="visually-hidden">ChatGPT Status lädt...</span>
-            {:then chatGPTenabled}
-                {#if chatGPTenabled}
+            {:then aiEnabled}
+                {#if aiEnabled.chatgpt }
                     <a id="chatgpt-btn" class="btn btn-outline-success" href="https://chat.openai.com/" target="_blank" title="Zu ChatGPT">
                         <img id="chatgpt-logo" src="{chatGPTIcon}" width="30px" height="30px" alt="ChatGPT Logo" />
+                    </a>
+                {/if}
+                {#if aiEnabled.claude }
+                    <a id="claude-btn" class="btn btn-outline-success" href="https://chlaude.ai/chats/" target="_blank" title="Zu Claude">
+                        <img id="claude-logo" src="{claudeIcon}" width="30px" height="30px" alt="Claude Logo" />
                     </a>
                 {/if}
             {:catch err}
@@ -87,7 +82,7 @@
 
         <hr />
 
-        <form action="/bullets" method="post">
+        <form action="/api/category/bullets" method="post">
             <div class="visually-hidden">
                 <input type="text" id="category-input" readonly value="{title}" name="category" />
             </div>

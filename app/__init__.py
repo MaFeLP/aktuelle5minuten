@@ -26,7 +26,8 @@ from .db_helper import (
     demote_article as db_demote_article,
     get_articles_from_category,
     mark_category_printed,
-    get_print_articles, mark_bullets_as_printed,
+    get_print_articles,
+    mark_bullets_as_printed,
 )
 from .dlf import (
     download_article,
@@ -84,13 +85,7 @@ def serve(path):
     send_from_directory("static", path)
 
 
-@app.route("/articles")
-def articles_get():
-    wr = download_wochenrueckblick()
-    return parse_wochenrueckblick(wr)
-
-
-@app.route("/article")
+@app.route("/api/article/get/first")
 def first_article():
     article = get_first_article(get_db(), app)
     if article is None:
@@ -101,23 +96,16 @@ def first_article():
     return parsed
 
 
-@app.route("/article/<string:ref>")
-def article_get(ref: str):
-    html = download_article(DLF_PREFIX + ref)
+@app.route("/api/article/get")
+def article_get():
+    key = request.args["key"]
+    html = download_article(DLF_PREFIX + key)
     parsed = parse_article(html)
     update_article_contents(get_db(), parsed)
     return parsed
 
 
-@app.route("/add/<string:ref>")
-def add_article(ref: str):
-    html = download_article(DLF_PREFIX + ref)
-    article = parse_article(html)
-    update_article_contents(get_db(), article)
-    return Response("Created", 201)
-
-
-@app.route("/bullets", methods=["POST"])
+@app.route("/api/category/bullets", methods=["POST"])
 def add_bullets() -> Response:
     def typst_escape(string: str) -> str:
         string = string.replace("#", r"\#")
@@ -170,9 +158,13 @@ def add_bullets() -> Response:
     return redirect("/pdfcreate")
 
 
-@app.route("/categories")
+@app.route("/api/category/all")
 def categories():
     db_categories = get_categories(get_db())
+
+    if request.args["print"] == "true":
+        return [] if db_categories is None else db_categories
+
     if db_categories is None:
         return sorted(_DEFAULT_CATEGORIES)
     for category in _DEFAULT_CATEGORIES:
@@ -181,21 +173,19 @@ def categories():
     return sorted(db_categories)
 
 
-@app.route("/chatgpt")
-def chatgpt():
-    enabled = False
+@app.route("/api/ai")
+def ai_status():
+    chatgpt, claude = False, False
     if os.environ.get("ENABLE_CHATGPT", None) in ["1", "True", "TRUE", "true"]:
-        enabled = True
-    return {"enabled": enabled}
+        chatgpt = True
+    if os.environ.get("ENABLE_CLAUDE", None) in ["1", "True", "TRUE", "true"]:
+        claude = True
+    return {"chatgpt": chatgpt, "claude": claude}
 
 
-@app.route("/print_categories")
-def print_categories():
-    return sorted(get_categories(get_db()))
-
-
-@app.route("/category/<string:category>")
-def get_articles_by_category(category: str):
+@app.route("/api/category/summary")
+def get_articles_by_category():
+    category = request.args["category"]
     results = get_articles_from_category(get_db(), category)
     out = ""
     for result in results:
@@ -217,18 +207,18 @@ def get_articles_by_category(category: str):
     }
 
 
-@app.route("/clean")
+@app.route("/api/actions/clean")
 def clean_articles():
     clean(get_db())
     return Response("Database cleared", 200)
 
 
-@app.route("/count")
+@app.route("/api/count")
 def count_articles():
     return count(get_db())
 
 
-@app.route("/files")
+@app.route("/api/files")
 def list_files():
     os.makedirs(app.root_path + "/pdfs", exist_ok=True)
     files = os.listdir(app.root_path + "/pdfs")
@@ -236,12 +226,12 @@ def list_files():
 
 
 @app.route("/files/<path:path>")
-def download_pds(path):
+def download_pdfs(path):
     os.makedirs(app.root_path + "/pdfs", exist_ok=True)
     return send_from_directory("pdfs", path)
 
 
-@app.route("/load")
+@app.route("/api/actions/load")
 def load_articles_to_db():
     wr = download_wochenrueckblick()
     parsed = parse_wochenrueckblick(wr)
@@ -249,17 +239,18 @@ def load_articles_to_db():
     return Response("Created", 201)
 
 
-@app.route("/demote/<string:key>")
-def demote_article(key: str):
-    db_demote_article(get_db(), key)
+@app.route("/api/article/demote")
+def demote_article():
+    db_demote_article(get_db(), request.args["key"])
     return Response("Ok", 201)
 
 
-@app.route("/promote/<string:category>/<string:key>")
-def promote_article(category: str, key: str):
+@app.route("/api/article/promote")
+def promote_article():
+    category, key = request.args["category"], request.args["key"]
     if len(category) > 63:
         return Response("Category too long. Maximum of 63 characters allowed", 400)
-    db_promote_article(get_db(), category, key)
+    db_promote_article(get_db(), key, category)
     return Response("Ok", 201)
 
 
