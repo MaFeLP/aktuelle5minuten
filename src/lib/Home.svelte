@@ -1,20 +1,22 @@
 <script lang="ts">
-    import newsLogo from "/news.svg";
-    import LoadArticles from "./selectors/LoadArticles.svelte";
-    import ResetDB from "./selectors/ResetDB.svelte";
+  import newsLogo from "/news.svg";
+  import LoadArticles from "./selectors/LoadArticles.svelte";
+  import ResetDB from "./selectors/ResetDB.svelte";
 </script>
 
 <main>
-    <img id="logo" src={newsLogo} alt="News Logo"/>
-    <h1>Aktuelle 5 Minuten</h1>
+  <img id="logo" src={newsLogo} alt="News Logo" />
+  <h1>Aktuelle 5 Minuten</h1>
 
-    <div id="selectors">
-        <a href="/pdflist" class="btn btn-outline-secondary">PDF Dateien auflisten</a>
-        <LoadArticles />
-        <a href="/tinder" class="btn btn-success">Nachrichten Tinder spielen</a>
-        <a href="/pdfcreate" class="btn btn-outline-warning">PDF erstellen</a>
-        <ResetDB />
-    </div>
+  <div id="selectors">
+    <a href="/pdflist" class="btn btn-outline-secondary"
+      >PDF Dateien auflisten</a
+    >
+    <LoadArticles />
+    <a href="/tinder" class="btn btn-success">Nachrichten Tinder spielen</a>
+    <a href="/pdfcreate" class="btn btn-outline-warning">PDF erstellen</a>
+    <ResetDB />
+  </div>
 </main>
 
 <style lang="sass">

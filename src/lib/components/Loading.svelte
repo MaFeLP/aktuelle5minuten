@@ -1,6 +1,6 @@
 <div id="loading-text" class="text-muted">
-    <span role="status">Laden...</span>
-    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+  <span role="status">Laden...</span>
+  <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
 </div>
 
 <style lang="sass">

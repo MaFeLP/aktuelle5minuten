@@ -1,63 +1,78 @@
 <script lang="ts">
-    import ErrorAlert from "./ErrorAlert.svelte";
-    import {CategoryApi} from "../../api-client";
+  import ErrorAlert from "./ErrorAlert.svelte";
+  import { CategoryApi } from "../../api-client";
 
-    const categoriesApi = new CategoryApi();
+  const categoriesApi = new CategoryApi();
 
-    export let promote: (category: string) => Promise<void>;
+  export let promote: (category: string) => Promise<void>;
 
-    export let closeDialog: () => void;
+  export let closeDialog: () => void;
 
-    async function onSubmit() {
-        if ((document.getElementById('promote-dialog')! as HTMLDialogElement).returnValue === "cancel") {
-            console.log("Aborting submission");
-        } else {
-            await promote((document.getElementById('category-input')! as HTMLInputElement).value);
-            console.log("Promoting article...");
-        }
+  async function onSubmit() {
+    if (
+      (document.getElementById("promote-dialog")! as HTMLDialogElement)
+        .returnValue === "cancel"
+    ) {
+      console.log("Aborting submission");
+    } else {
+      await promote(
+        (document.getElementById("category-input")! as HTMLInputElement).value,
+      );
+      console.log("Promoting article...");
     }
+  }
 
-    let categoriesPromise = categoriesApi.getAll({print: false});
+  let categoriesPromise = categoriesApi.getAll({ print: false });
 </script>
 
 <dialog id="promote-dialog" on:submit={onSubmit}>
-    <form method="dialog">
-        <div class="modal-header">
-            <h5 class="modal-title">Post aufnehmen!</h5>
-        </div>
+  <form method="dialog">
+    <div class="modal-header">
+      <h5 class="modal-title">Post aufnehmen!</h5>
+    </div>
 
-        <hr/>
+    <hr />
 
-        <div class="modal-body">
-            <label for="category-input" class="form-label">Kategorie auswählen</label>
-            <input
-                    class="form-control"
-                    list="categories-options"
-                    id="category-input"
-                    placeholder="Innenpolitik"
-                    minlength="1"
-                    maxlength="63"
-            >
-            {#await categoriesPromise}
-                <small class="text-muted hidden">Kategorien werden geladen...</small>
-            {:then categories}
-                <datalist id="categories-options">
-                    {#each categories as category}
-                        <option value="{category}">
-                    {/each}
-                </datalist>
-            {:catch err}
-                <ErrorAlert body="Kategories konnten nicht geladen werden!" error={err} />
-            {/await}
-        </div>
+    <div class="modal-body">
+      <label for="category-input" class="form-label">Kategorie auswählen</label>
+      <input
+        class="form-control"
+        list="categories-options"
+        id="category-input"
+        placeholder="Innenpolitik"
+        minlength="1"
+        maxlength="63"
+      />
+      {#await categoriesPromise}
+        <small class="text-muted hidden">Kategorien werden geladen...</small>
+      {:then categories}
+        <datalist id="categories-options">
+          {#each categories as category}
+            <option value={category}> </option>{/each}
+        </datalist>
+      {:catch err}
+        <ErrorAlert
+          body="Kategories konnten nicht geladen werden!"
+          error={err}
+        />
+      {/await}
+    </div>
 
-        <hr/>
+    <hr />
 
-        <div class="modal-footer">
-            <button id="dialog-submit-btn" class="btn btn-success" type="submit">Abschicken</button>
-            <button id="dialog-cancel-btn" class="btn btn-outline-danger" value="cancel" on:click={closeDialog} type="reset">Abbrechen</button>
-        </div>
-    </form>
+    <div class="modal-footer">
+      <button id="dialog-submit-btn" class="btn btn-success" type="submit"
+        >Abschicken</button
+      >
+      <button
+        id="dialog-cancel-btn"
+        class="btn btn-outline-danger"
+        value="cancel"
+        on:click={closeDialog}
+        type="reset">Abbrechen</button
+      >
+    </div>
+  </form>
 </dialog>
 
 <style lang="sass">
