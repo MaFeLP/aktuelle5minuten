@@ -19,6 +19,7 @@
       articleApi
         .getFirst()
         .then((article) => {
+          counter++;
           resolve(article);
         })
         .catch((res) => {
