@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "generate": "openapi-generator-cli generate -g typescript-fetch -i apispec.yaml -o src/api-client && sed -i -E 's|export const BASE_PATH.*$|export const BASE_PATH = \"/\";|g' src/api-client/runtime.ts"
+    "generate": "openapi-generator-cli generate -g typescript-fetch -i apispec.yaml -o src/api-client"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.13.1",

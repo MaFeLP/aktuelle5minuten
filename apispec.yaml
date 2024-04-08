@@ -8,7 +8,7 @@ info:
     url: "https://www.gnu.org/licenses/gpl-3.0.html"
 
 servers:
-  - url: '/'
+  - url: 'https://aktuelle5minuten.maxfehlinger.de'
 
 tags:
   - name: "article"
