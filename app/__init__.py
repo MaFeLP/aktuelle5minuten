@@ -1,4 +1,5 @@
 import datetime
+from logging.config import dictConfig
 import os
 import tempfile
 import typst
@@ -48,6 +49,22 @@ _DEFAULT_CATEGORIES = [
     "Wirtschaft",
 ]
 
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s][%(module)s][%(levelname)s] %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'INFO',
+        'handlers': ['wsgi']
+    }
+})
+
 app = Flask(__name__, static_url_path="", static_folder="static")
 
 
@@ -90,10 +107,15 @@ def first_article():
     article = get_first_article(get_db(), app)
     if article is None:
         return Response("No articles found", 404)
-    html = download_article(DLF_PREFIX + article["key"])
-    parsed = parse_article(html)
-    update_article_contents(get_db(), parsed)
-    return parsed
+    try:
+        html = download_article(DLF_PREFIX + article["key"])
+        parsed = parse_article(html)
+        update_article_contents(get_db(), parsed)
+        return parsed
+    except ConnectionError as ex:
+        app.logger.warn('Could not download article %s; Error: %s', article["key"], ex)
+        db_demote_article(get_db(), article["key"])
+        return first_article()
 
 
 @app.route("/api/article/get")
