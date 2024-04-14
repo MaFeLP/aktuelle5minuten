@@ -50,6 +50,8 @@ paths:
       tags: ["article"]
       description: "Gets the first article in the database"
       operationId: "getFirst"
+      parameters:
+        - $ref: '#/components/parameters/date'
       responses:
         200:
           description: "There exists a first article and it is returned in the body"
@@ -60,11 +62,25 @@ paths:
         404:
           description: >-
             No more articles left that have no category and status assigned.
-            
+
             You can call `/api/actions/load` to load more articles (or wait some time, if no more articles have been written).
           content:
             text/plain:
               example: "No articles found"
+  /api/article/dates:
+    get:
+      tags: ["article"]
+      description: "Gets all dates that have uncategorized articles"
+      operationId: "getDates"
+      responses:
+        200:
+          description: "The available dates with uncategorized articles"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
   /api/article/promote:
     get:
       tags: ["article"]
@@ -273,6 +289,8 @@ paths:
       summary: "How many articles/categories exist"
       description: "How many articles/categories exist in the database"
       operationId: "count"
+      parameters:
+        - $ref: '#/components/parameters/date'
       responses:
         200:
           description: "How many articles/categories exist in the database"
@@ -370,6 +388,15 @@ components:
       in: query
       schema:
         type: string
+    date:
+      name: articleDate
+      description: "The date from which the article should be (in ISO format)"
+      allowEmptyValue: true
+      schema:
+        type: string
+      required: false
+      example: 2024-02-28
+      in: query
 
   responses:
     '500':

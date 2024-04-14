@@ -10,23 +10,48 @@
   const articleApi = new ArticleApi();
   const statusApi = new StatusApi();
 
+  const query = new URLSearchParams(window.location.search);
+  const query_date =
+    query.get("date") == null ? null : new Date(query.get("date")!);
+
   let articlePromise: Promise<Article | "DONE"> | null = null;
   let counter = 0;
-  let maxCounterPromise = statusApi.count();
+  let maxCounterPromise =
+    query_date == null || isNaN(query_date!.getDate())
+      ? statusApi.count()
+      : statusApi.count({
+          articleDate: query_date!.toISOString().slice(0, 10),
+        });
 
   let newArticle = () => {
-    articlePromise = new Promise((resolve, reject) => {
-      articleApi
-        .getFirst()
-        .then((article) => {
-          counter++;
-          resolve(article);
-        })
-        .catch((res) => {
-          console.error("API response not ok!", res);
-          reject("API response not ok!");
-        });
-    });
+    // No query date was provided or the date is invalid
+    if (query_date == null || isNaN(query_date!.getDate()))
+      // get the first general article
+      articlePromise = new Promise((resolve, reject) => {
+        articleApi
+          .getFirst()
+          .then((article) => {
+            counter++;
+            resolve(article);
+          })
+          .catch((res) => {
+            console.error("API response not ok!", res);
+            reject("API response not ok!");
+          });
+      });
+    else
+      articlePromise = new Promise((resolve, reject) => {
+        articleApi
+          .getFirst({ articleDate: query_date!.toISOString().slice(0, 10) })
+          .then((article) => {
+            counter++;
+            resolve(article);
+          })
+          .catch((res) => {
+            console.error("API response not ok!", res);
+            reject("API response not ok!");
+          });
+      });
   };
 
   newArticle();

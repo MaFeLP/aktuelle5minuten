@@ -25,6 +25,10 @@ import {
     CountToJSON,
 } from '../models/index';
 
+export interface CountRequest {
+    articleDate?: string;
+}
+
 /**
  * 
  */
@@ -62,8 +66,12 @@ export class StatusApi extends runtime.BaseAPI {
      * How many articles/categories exist in the database
      * How many articles/categories exist
      */
-    async countRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Count>> {
+    async countRaw(requestParameters: CountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Count>> {
         const queryParameters: any = {};
+
+        if (requestParameters['articleDate'] != null) {
+            queryParameters['articleDate'] = requestParameters['articleDate'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -81,8 +89,8 @@ export class StatusApi extends runtime.BaseAPI {
      * How many articles/categories exist in the database
      * How many articles/categories exist
      */
-    async count(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Count> {
-        const response = await this.countRaw(initOverrides);
+    async count(requestParameters: CountRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Count> {
+        const response = await this.countRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

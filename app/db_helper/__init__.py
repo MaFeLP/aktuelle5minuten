@@ -1,5 +1,4 @@
 import hashlib
-from ..dlf import PREFIX as DLF_PREFIX
 from flask import g, Flask, abort
 from sqlite3 import Connection, connect
 from .queries import *
@@ -30,6 +29,18 @@ def clean(db: Connection):
 def count(db: Connection):
     cursor = db.cursor()
     articles = cursor.execute(COUNT_ARTICLES).fetchone()[0]
+    categories = cursor.execute(COUNT_CATEGORIES).fetchone()[0]
+    return {"articles": articles, "categories": categories}
+
+
+def count_by_date(db: Connection, date: str):
+    cursor = db.cursor()
+    articles = cursor.execute(
+        COUNT_ARTICLES_BY_DATE,
+        [
+            date,
+        ],
+    ).fetchone()[0]
     categories = cursor.execute(COUNT_CATEGORIES).fetchone()[0]
     return {"articles": articles, "categories": categories}
 
@@ -101,12 +112,31 @@ def get_articles_from_category(db: Connection, category: str) -> list:
     ).fetchall()
 
 
+def get_article_dates(db: Connection) -> list[str]:
+    return [date[0] for date in db.cursor().execute(GET_ARTICLE_DATES).fetchall()]
+
+
 def get_first_article(db: Connection, app: Flask) -> dict | None:
     cursor = db.cursor()
     result = cursor.execute(FIRST_ARTICLE).fetchall()
     if len(result) == 0:
         return None
     article = _article_from_db_result(result[0])
+    app.logger.debug(article)
+    return article
+
+
+def get_first_article_by_date(db: Connection, app: Flask, date: str) -> dict | None:
+    cursor = db.cursor()
+    result = cursor.execute(
+        FIRST_ARTICLE_BY_DATE,
+        [
+            date,
+        ],
+    ).fetchone()
+    if len(result) == 0:
+        return None
+    article = _article_from_db_result(result)
     app.logger.debug(article)
     return article
 

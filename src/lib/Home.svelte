@@ -13,7 +13,7 @@
       >PDF Dateien auflisten</a
     >
     <LoadArticles />
-    <a href="/tinder" class="btn btn-success">Nachrichten Tinder spielen</a>
+    <a href="/dates" class="btn btn-success">Nachrichten Tinder spielen</a>
     <a href="/pdfcreate" class="btn btn-outline-warning">PDF erstellen</a>
     <ResetDB />
   </div>

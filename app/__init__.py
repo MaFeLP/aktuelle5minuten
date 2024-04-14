@@ -29,6 +29,9 @@ from .db_helper import (
     mark_category_printed,
     get_print_articles,
     mark_bullets_as_printed,
+    get_article_dates,
+    get_first_article_by_date,
+    count_by_date,
 )
 from .dlf import (
     download_article,
@@ -107,7 +110,13 @@ def serve(path):
 
 @app.route("/api/article/get/first")
 def first_article():
-    article = get_first_article(get_db(), app)
+    date = request.args.get("articleDate")
+    article = (
+        get_first_article(get_db(), app)
+        # Get first article independent of date is empty value or no value was supplied
+        if date is None or len(date) != 10
+        else get_first_article_by_date(get_db(), app, date)
+    )
     if article is None:
         return Response("No articles found", 404)
     try:
@@ -128,6 +137,11 @@ def article_get():
     parsed = parse_article(html)
     update_article_contents(get_db(), parsed)
     return parsed
+
+
+@app.route("/api/article/dates")
+def article_dates():
+    return get_article_dates(get_db())
 
 
 @app.route("/api/category/bullets", methods=["POST"])
@@ -240,7 +254,12 @@ def clean_articles():
 
 @app.route("/api/count")
 def count_articles():
-    return count(get_db())
+    date = request.args.get("articleDate")
+    # Get first article independent of date is empty value or no value was supplied
+    if date is None or len(date) != 10:
+        return count(get_db())
+    else:
+        return count_by_date(get_db(), date)
 
 
 @app.route("/api/files")

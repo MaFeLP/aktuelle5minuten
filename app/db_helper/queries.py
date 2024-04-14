@@ -4,6 +4,9 @@ CLEAN_PRINT_ARTICLES = (
 )
 
 COUNT_ARTICLES = """SELECT COUNT(*) FROM articles WHERE status = 0"""
+COUNT_ARTICLES_BY_DATE = (
+    """SELECT COUNT(*) FROM articles WHERE status = 0 AND DATE(date) = (?)"""
+)
 COUNT_CATEGORIES = """SELECT COUNT(DISTINCT category) FROM articles WHERE status = 1"""
 
 INSERT_ARTICLES = """
@@ -21,6 +24,14 @@ ORDER BY `date`
 LIMIT 1 
 """
 
+FIRST_ARTICLE_BY_DATE = """
+SELECT *
+FROM `articles`
+WHERE `status` = 0 AND DATE(date) = (?)
+ORDER BY `date`
+LIMIT 1 
+"""
+
 GET_ARTICLE_KEY = """SELECT * FROM `articles` WHERE `key` = (?)"""
 
 GET_ARTICLES_CATEGORY = (
@@ -28,6 +39,10 @@ GET_ARTICLES_CATEGORY = (
 )
 
 GET_CATEGORIES = """SELECT DISTINCT `category` FROM `articles` WHERE `status` = 1"""
+
+GET_ARTICLE_DATES = (
+    """SELECT DISTINCT DATE(`date`) FROM `articles` WHERE `status` = 0 ORDER BY date"""
+)
 
 INSERT_ARTICLE_CONTENT = """
 UPDATE `articles`

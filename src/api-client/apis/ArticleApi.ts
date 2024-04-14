@@ -30,6 +30,10 @@ export interface GetRequest {
     key?: string;
 }
 
+export interface GetFirstRequest {
+    articleDate?: string;
+}
+
 export interface PromoteRequest {
     category?: string;
     key?: string;
@@ -100,10 +104,40 @@ export class ArticleApi extends runtime.BaseAPI {
     }
 
     /**
+     * Gets all dates that have uncategorized articles
+     */
+    async getDatesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/article/dates`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     * Gets all dates that have uncategorized articles
+     */
+    async getDates(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+        const response = await this.getDatesRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Gets the first article in the database
      */
-    async getFirstRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Article>> {
+    async getFirstRaw(requestParameters: GetFirstRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Article>> {
         const queryParameters: any = {};
+
+        if (requestParameters['articleDate'] != null) {
+            queryParameters['articleDate'] = requestParameters['articleDate'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -120,8 +154,8 @@ export class ArticleApi extends runtime.BaseAPI {
     /**
      * Gets the first article in the database
      */
-    async getFirst(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Article> {
-        const response = await this.getFirstRaw(initOverrides);
+    async getFirst(requestParameters: GetFirstRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Article> {
+        const response = await this.getFirstRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
