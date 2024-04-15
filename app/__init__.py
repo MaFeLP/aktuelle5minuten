@@ -82,6 +82,10 @@ def close_connection(_exception):
 
 
 @app.route("/")
+@app.route("/dates")
+@app.route("/dates/")
+@app.route("/dates/index.html")
+@app.route("/dates.html")
 @app.route("/tinder")
 @app.route("/tinder/")
 @app.route("/tinder/index.html")
