@@ -134,7 +134,7 @@ def get_first_article_by_date(db: Connection, app: Flask, date: str) -> dict | N
             date,
         ],
     ).fetchone()
-    if len(result) == 0:
+    if result is None or len(result) == 0:
         return None
     article = _article_from_db_result(result)
     app.logger.debug(article)

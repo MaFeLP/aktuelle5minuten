@@ -127,6 +127,11 @@ def first_article():
         html = download_article(DLF_PREFIX + article["key"])
         parsed = parse_article(html)
         update_article_contents(get_db(), parsed)
+
+        # Article has been updated and moved! Work with the newer version and discard the older one!
+        if parsed["key"] != article["key"]:
+            db_demote_article(get_db(), article["key"])
+
         return parsed
     except ConnectionError as ex:
         app.logger.warn("Could not download article %s; Error: %s", article["key"], ex)

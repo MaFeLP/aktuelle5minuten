@@ -74,7 +74,7 @@ def parse_wochenrueckblick(wr: str) -> list[dict[str, str]]:
     return articles
 
 
-def download_article(href: str) -> str | int:
+def download_article(href: str) -> str:
     assert href is not None
     assert href.startswith("https://www.deutschlandfunk.de/")
     r = requests.get(href)
