@@ -67,10 +67,15 @@
       <button
         class="select-btn col btn btn-outline-success"
         on:click={openDialog}
+        tabindex="1"
       >
         <i class="bi bi-check2"></i>
       </button>
-      <button class="select-btn col btn btn-outline-danger" on:click={demote}>
+      <button
+        class="select-btn col btn btn-outline-danger"
+        on:click={demote}
+        tabindex="2"
+      >
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
