@@ -42,8 +42,8 @@ devDependencies:
     specifier: ^3.8.0
     version: 3.8.0(postcss@8.4.38)(sass@1.77.4)(svelte@4.2.18)
   tslib:
-    specifier: ^2.6.2
-    version: 2.6.2
+    specifier: ^2.6.3
+    version: 2.6.3
   typescript:
     specifier: ^5.4.5
     version: 5.4.5
@@ -1609,7 +1609,7 @@ packages:
   /rxjs@7.8.1:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
     dev: true
 
   /sade@1.8.1:
@@ -1850,6 +1850,10 @@ packages:
 
   /tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
+    dev: true
+
+  /tslib@2.6.3:
+    resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
     dev: true
 
   /type-fest@0.21.3:
