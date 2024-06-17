@@ -46,7 +46,7 @@ jobs:
 
       # Only build the image in pull requests, so checks can pass, but not deployment
       - name: Build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         if: github.event_name == 'pull_request'
         with:
           context: .
@@ -57,7 +57,7 @@ jobs:
 
       # On main pushes, update the image in the registry to trigger CD
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         if: github.event_name == 'push'
         with:
           context: .
