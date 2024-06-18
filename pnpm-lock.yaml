@@ -33,14 +33,14 @@ devDependencies:
     specifier: ^3.2.4
     version: 3.2.4(prettier@3.3.2)(svelte@4.2.18)
   sass:
-    specifier: ^1.77.4
-    version: 1.77.4
+    specifier: ^1.77.5
+    version: 1.77.5
   svelte:
     specifier: ^4.2.18
     version: 4.2.18
   svelte-check:
     specifier: ^3.8.0
-    version: 3.8.0(postcss@8.4.38)(sass@1.77.4)(svelte@4.2.18)
+    version: 3.8.0(postcss@8.4.38)(sass@1.77.5)(svelte@4.2.18)
   tslib:
     specifier: ^2.6.3
     version: 2.6.3
@@ -49,7 +49,7 @@ devDependencies:
     version: 5.4.5
   vite:
     specifier: ^5.2.13
-    version: 5.2.13(sass@1.77.4)
+    version: 5.2.13(sass@1.77.5)
 
 packages:
 
@@ -584,7 +584,7 @@ packages:
       '@sveltejs/vite-plugin-svelte': 3.1.1(svelte@4.2.18)(vite@5.2.13)
       debug: 4.3.4
       svelte: 4.2.18
-      vite: 5.2.13(sass@1.77.4)
+      vite: 5.2.13(sass@1.77.5)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -603,7 +603,7 @@ packages:
       magic-string: 0.30.10
       svelte: 4.2.18
       svelte-hmr: 0.16.0(svelte@4.2.18)
-      vite: 5.2.13(sass@1.77.4)
+      vite: 5.2.13(sass@1.77.5)
       vitefu: 0.2.5(vite@5.2.13)
     transitivePeerDependencies:
       - supports-color
@@ -1636,8 +1636,8 @@ packages:
       rimraf: 2.7.1
     dev: true
 
-  /sass@1.77.4:
-    resolution: {integrity: sha512-vcF3Ckow6g939GMA4PeU7b2K/9FALXk2KF9J87txdHzXbUF9XRQRwSxcAs/fGaTnJeBFd7UoV22j3lzMLdM0Pw==}
+  /sass@1.77.5:
+    resolution: {integrity: sha512-oDfX1mukIlxacPdQqNb6mV2tVCrnE+P3nVYioy72V5tlk56CPNcO4TCuFcaCRKKfJ1M3lH95CleRS+dVKL2qMg==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
@@ -1712,7 +1712,7 @@ packages:
       has-flag: 4.0.0
     dev: true
 
-  /svelte-check@3.8.0(postcss@8.4.38)(sass@1.77.4)(svelte@4.2.18):
+  /svelte-check@3.8.0(postcss@8.4.38)(sass@1.77.5)(svelte@4.2.18):
     resolution: {integrity: sha512-7Nxn+3X97oIvMzYJ7t27w00qUf1Y52irE2RU2dQAd5PyvfGp4E7NLhFKVhb6PV2fx7dCRMpNKDIuazmGthjpSQ==}
     hasBin: true
     peerDependencies:
@@ -1725,7 +1725,7 @@ packages:
       picocolors: 1.0.0
       sade: 1.8.1
       svelte: 4.2.18
-      svelte-preprocess: 5.1.4(postcss@8.4.38)(sass@1.77.4)(svelte@4.2.18)(typescript@5.4.5)
+      svelte-preprocess: 5.1.4(postcss@8.4.38)(sass@1.77.5)(svelte@4.2.18)(typescript@5.4.5)
       typescript: 5.4.5
     transitivePeerDependencies:
       - '@babel/core'
@@ -1748,7 +1748,7 @@ packages:
       svelte: 4.2.18
     dev: true
 
-  /svelte-preprocess@5.1.4(postcss@8.4.38)(sass@1.77.4)(svelte@4.2.18)(typescript@5.4.5):
+  /svelte-preprocess@5.1.4(postcss@8.4.38)(sass@1.77.5)(svelte@4.2.18)(typescript@5.4.5):
     resolution: {integrity: sha512-IvnbQ6D6Ao3Gg6ftiM5tdbR6aAETwjhHV+UKGf5bHGYR69RQvF1ho0JKPcbUON4vy4R7zom13jPjgdOWCQ5hDA==}
     engines: {node: '>= 16.0.0'}
     requiresBuild: true
@@ -1790,7 +1790,7 @@ packages:
       detect-indent: 6.1.0
       magic-string: 0.30.10
       postcss: 8.4.38
-      sass: 1.77.4
+      sass: 1.77.5
       sorcery: 0.11.0
       strip-indent: 3.0.0
       svelte: 4.2.18
@@ -1894,7 +1894,7 @@ packages:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
     dev: true
 
-  /vite@5.2.13(sass@1.77.4):
+  /vite@5.2.13(sass@1.77.5):
     resolution: {integrity: sha512-SSq1noJfY9pR3I1TUENL3rQYDQCFqgD+lM6fTRAM8Nv6Lsg5hDLaXkjETVeBt+7vZBCMoibD+6IWnT2mJ+Zb/A==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -1925,7 +1925,7 @@ packages:
       esbuild: 0.20.2
       postcss: 8.4.38
       rollup: 4.16.1
-      sass: 1.77.4
+      sass: 1.77.5
     optionalDependencies:
       fsevents: 2.3.3
     dev: true
@@ -1938,7 +1938,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 5.2.13(sass@1.77.4)
+      vite: 5.2.13(sass@1.77.5)
     dev: true
 
   /wcwidth@1.0.1:
