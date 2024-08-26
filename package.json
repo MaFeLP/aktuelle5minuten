@@ -13,7 +13,7 @@
     "lint": "prettier --check src/lib/ src/App.svelte src/main.ts src/vite-env.d.ts"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.13.4",
+    "@openapitools/openapi-generator-cli": "^2.13.5",
     "@sveltejs/vite-plugin-svelte": "^3.1.1",
     "@tsconfig/svelte": "^5.0.4",
     "@types/bootstrap": "^5.2.10",
