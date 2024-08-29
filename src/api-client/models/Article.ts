@@ -52,12 +52,6 @@ export interface Article {
     description: string;
     /**
      * 
-     * @type {string}
-     * @memberof Article
-     */
-    author: string;
-    /**
-     * 
      * @type {ArticleContent}
      * @memberof Article
      */
@@ -95,7 +89,6 @@ export function instanceOfArticle(value: object): boolean {
     if (!('kicker' in value)) return false;
     if (!('title' in value)) return false;
     if (!('description' in value)) return false;
-    if (!('author' in value)) return false;
     if (!('content' in value)) return false;
     if (!('figures' in value)) return false;
     if (!('key' in value)) return false;
@@ -117,7 +110,6 @@ export function ArticleFromJSONTyped(json: any, ignoreDiscriminator: boolean): A
         'kicker': json['kicker'],
         'title': json['title'],
         'description': json['description'],
-        'author': json['author'],
         'content': ArticleContentFromJSON(json['content']),
         'figures': ((json['figures'] as Array<any>).map(ArticleFiguresInnerFromJSON)),
         'key': json['key'],
@@ -135,7 +127,6 @@ export function ArticleToJSON(value?: Article | null): any {
         'kicker': value['kicker'],
         'title': value['title'],
         'description': value['description'],
-        'author': value['author'],
         'content': ArticleContentToJSON(value['content']),
         'figures': ((value['figures'] as Array<any>).map(ArticleFiguresInnerToJSON)),
         'key': value['key'],

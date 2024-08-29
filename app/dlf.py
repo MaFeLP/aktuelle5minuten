@@ -126,7 +126,6 @@ def parse_article(html: str) -> dict[str, str]:
         "kicker": header.find("span", {"class": "headline-kicker"}).text,
         "title": header.find("span", {"class": "headline-title"}).text,
         "description": header.find("p", {"class": "article-header-description"}).text,
-        "author": header.find("div", {"class": "article-header-author"}).span.text,
         "content": {
             "html": section.decode_contents().strip(),
             "plaintext": section.text.strip(),

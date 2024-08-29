@@ -317,15 +317,13 @@ components:
     article:
       description: "The article object"
       type: object
-      required: ["kicker", "title", "description", "author", "content", "figures", "key", "date", "localeDate"]
+      required: ["kicker", "title", "description", "content", "figures", "key", "date", "localeDate"]
       properties:
         kicker:
           type: string
         title:
           type: string
         description:
-          type: string
-        author:
           type: string
         content:
           type: object
