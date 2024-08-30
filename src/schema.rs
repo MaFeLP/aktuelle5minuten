@@ -4,10 +4,10 @@ diesel::table! {
     articles (key) {
         key -> Text,
         title -> Text,
-        teaserHeadline -> Text,
-        teaserText -> Text,
+        teaser_headline -> Text,
+        teaser_text -> Text,
         date -> Timestamp,
-        localeDate -> Text,
+        locale_date -> Text,
         kicker -> Nullable<Text>,
         description -> Nullable<Text>,
         content -> Nullable<Text>,

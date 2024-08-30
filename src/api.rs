@@ -21,6 +21,10 @@ pub struct Article {
     pub description: Option<String>,
     pub content: Option<String>,
     pub category: Option<String>,
+    /// 0: Uncategorized
+    /// 1: Accepted
+    /// 2: Demoted, do not print (can be deleted)
+    /// 3: Bullet Points have been created and the text is in the print_articles
     pub status: i32,
 }
 
@@ -76,12 +80,9 @@ pub async fn get_first_article(
 pub struct NewArticle {
     pub key: String,
     pub title: String,
-    #[diesel(column_name = "teaserHeadline")]
     pub teaser_headline: String,
-    #[diesel(column_name = "teaserText")]
     pub teaser_text: String,
     pub date: PrimitiveDateTime,
-    #[diesel(column_name = "localeDate")]
     pub locale_date: String,
     pub kicker: Option<String>,
     pub description: Option<String>,
