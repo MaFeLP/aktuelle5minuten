@@ -111,7 +111,13 @@ fn rocket() -> _ {
                 api::article::get_all_article_dates,
             ],
         )
-        .mount("/api/actions/", routes![api::actions::load_new_articles,])
+        .mount(
+            "/api/actions/",
+            routes![
+                api::actions::load_new_articles,
+                api::actions::clean_articles,
+            ],
+        )
         .mount(
             "/api/category/",
             routes![

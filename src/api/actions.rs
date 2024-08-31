@@ -1,8 +1,41 @@
 use crate::{dlf, DbConn};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
+use std::ops::Sub;
 
-// A route /api/actions/load that gets the latest dlf::wockenrueckblick and then inserts all the articles into the articles database
+#[get("/clean")]
+pub async fn clean_articles(conn: DbConn) -> Result<Status, Status> {
+    use crate::schema::articles::dsl;
+    use crate::schema::print_articles::dsl as print_dsl;
+
+    // Delete all articles older than one month
+    let deleted = conn
+        .run(move |c| {
+            diesel::delete(dsl::articles.filter(dsl::date.lt(
+                diesel::dsl::now.sub(diesel::dsl::sql::<diesel::sql_types::Interval>("'1 month'")),
+            )))
+            .execute(c)
+            .map_err(|_| Status::InternalServerError)
+        })
+        .await?;
+
+    // Delete all print articles
+    let deleted_print = conn
+        .run(move |c| {
+            diesel::delete(print_dsl::print_articles)
+                .execute(c)
+                .map_err(|_| Status::InternalServerError)
+        })
+        .await?;
+
+    warn!(
+        "Cleanup completed. Deleted {} articles and {} print_articles",
+        deleted, deleted_print
+    );
+
+    Ok(Status::Ok)
+}
+
 #[get("/load")]
 pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
     use crate::models::Article;
