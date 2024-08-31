@@ -109,6 +109,8 @@ fn rocket() -> _ {
                 api::article::get_first_article,
                 api::article::get_article_by_key,
                 api::article::get_all_article_dates,
+                api::article::demote_article,
+                api::article::promote_article,
             ],
         )
         .mount(

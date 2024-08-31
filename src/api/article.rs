@@ -18,6 +18,7 @@ pub async fn get_first_article(
                 dsl::articles
                     .select(dsl::articles::all_columns())
                     .filter(diesel::dsl::date(dsl::date).eq(article_date))
+                    .filter(dsl::status.eq(0))
                     .select(Article::as_select())
                     .first::<Article>(c)
                     .map_err(|_| Status::NotFound)
@@ -28,6 +29,7 @@ pub async fn get_first_article(
             conn.run(|c| {
                 dsl::articles
                     .select(Article::as_select())
+                    .filter(dsl::status.eq(0))
                     .first::<Article>(c)
                     .map_err(|_| Status::NotFound)
             })
@@ -107,4 +109,45 @@ pub async fn get_all_article_dates(conn: DbConn) -> Result<Json<Vec<String>>, St
         .await?;
 
     Ok(Json(dates))
+}
+
+#[get("/demote?<key>")]
+pub async fn demote_article(conn: DbConn, key: String) -> Result<Status, Status> {
+    use crate::schema::articles::dsl;
+
+    conn.run(move |c| {
+        diesel::update(dsl::articles.find(&key))
+            .set(dsl::status.eq(2))
+            .execute(c)
+            .map_err(|_| Status::InternalServerError)
+    }).await?;
+
+    Ok(Status::Created)
+}
+
+#[derive(FromForm)]
+pub struct PromoteQuery {
+    key: String,
+    category: String,
+}
+
+#[get("/promote?<query..>")]
+pub async fn promote_article(conn: DbConn, query: PromoteQuery) -> Result<Status, Status> {
+    use crate::schema::articles::dsl;
+
+    if query.category.is_empty() || query.category.len() > 63 {
+        return Err(Status::BadRequest);
+    }
+
+    conn.run(move |c| {
+        diesel::update(dsl::articles.find(&query.key))
+            .set((
+                     dsl::status.eq(1),
+                    dsl::category.eq(&query.category)
+            ))
+            .execute(c)
+            .map_err(|_| Status::InternalServerError)
+    }).await?;
+
+    Ok(Status::Created)
 }
