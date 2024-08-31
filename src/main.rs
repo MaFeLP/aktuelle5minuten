@@ -1,17 +1,15 @@
 mod api;
 mod dlf;
+mod models;
 mod schema;
 
 #[macro_use]
 extern crate rocket;
 
-use diesel::sqlite::Sqlite;
-use diesel::SqliteConnection;
+use diesel::{sqlite::Sqlite, SqliteConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use rocket::fairing::{Fairing, Info, Kind};
-use rocket::fs::NamedFile;
-use rocket::response::content::RawHtml;
-use rocket::{Orbit, Rocket};
+use rocket::{fs::NamedFile, response::content::RawHtml, Orbit, Rocket};
 use rocket_sync_db_pools::database;
 use std::path::{Path, PathBuf};
 
@@ -104,15 +102,8 @@ fn rocket() -> _ {
         .attach(MigrationsFairing)
         .mount(
             "/",
-            routes![
-                index,
-                dates,
-                tinder,
-                pdflist,
-                pdfcreate,
-                files,
-                api::get_first_article,
-                api::load_articles
-            ],
+            routes![index, dates, tinder, pdflist, pdfcreate, files,],
         )
+        .mount("/api/article/", routes![api::article::get_first_article,])
+        .mount("/api/actions/", routes![api::actions::load_new_articles,])
 }

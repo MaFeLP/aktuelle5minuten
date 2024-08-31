@@ -1,11 +1,9 @@
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 
-pub const PREFIX: & str = "https://www.deutschlandfunk.de/";
-const WOCKENRUECKBLICK_URL: & str =
-    "https://www.deutschlandfunk.de/nachrichten/wochenueberblick";
-const NON_ARTICLE_URLS: [&str; 3] =
-    ["nachrichten/nachlesen", "suche", "nachrichten/barrierefrei"];
+pub const PREFIX: &str = "https://www.deutschlandfunk.de/";
+const WOCKENRUECKBLICK_URL: &str = "https://www.deutschlandfunk.de/nachrichten/wochenueberblick";
+const NON_ARTICLE_URLS: [&str; 3] = ["nachrichten/nachlesen", "suche", "nachrichten/barrierefrei"];
 
 macro_rules! select_one {
     ($parent:expr, $selector:expr) => {
