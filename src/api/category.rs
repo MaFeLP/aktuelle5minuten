@@ -1,8 +1,9 @@
 //#[post("/bullets", data = "<bullet>")]
 
-use crate::DbConn;
+use crate::{regex, DbConn};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::{http::Status, serde::json::Json};
+use serde::Serialize;
 
 const DEFAULT_CATEGORIES: [&str; 7] = [
     "Aktuelles Ereignis",
@@ -53,4 +54,44 @@ pub async fn get_all_categories(
     categories.sort();
 
     Ok(Json(categories))
+}
+
+#[derive(Serialize, Debug)]
+pub struct CategoryResponse {
+    pub category: String,
+    pub count: usize,
+    pub text: String,
+}
+
+#[get("/summary?<category>")]
+pub async fn get_category_summary(
+    conn: DbConn,
+    category: String,
+) -> Result<Json<CategoryResponse>, Status> {
+    use crate::schema::articles::dsl;
+
+    let category_return = category.clone();
+    let contents: Vec<String> = conn
+        .run(move |c| {
+            dsl::articles
+                .select(dsl::content)
+                .filter(dsl::content.is_not_null())
+                .filter(dsl::category.eq(category))
+                .distinct()
+                .load::<Option<String>>(c)
+                .map_err(|_| Status::InternalServerError)
+        })
+        .await?
+        // We can safely unwrap here, as the filter in the query filters out non-null values.
+        .iter()
+        .map(|s| s.as_ref().unwrap().clone())
+        // Remove copyright notice (is not needed for the AI)
+        .map(|s| regex!(r#"Diese Nachricht wurde am \d{2}\.\d{2}\.\d{4} im Programm Deutschlandfunk gesendet\."#).replace_all(&s, "").to_string())
+        .collect();
+
+    Ok(Json(CategoryResponse {
+        category: category_return,
+        count: contents.len(),
+        text: contents.join("\n"),
+    }))
 }

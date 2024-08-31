@@ -114,6 +114,9 @@ fn rocket() -> _ {
         .mount("/api/actions/", routes![api::actions::load_new_articles,])
         .mount(
             "/api/category/",
-            routes![api::category::get_all_categories,],
+            routes![
+                api::category::get_all_categories,
+                api::category::get_category_summary,
+            ],
         )
 }
