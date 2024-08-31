@@ -117,6 +117,7 @@ fn rocket() -> _ {
             routes![
                 api::article::get_first_article,
                 api::article::get_article_by_key,
+                api::article::get_all_article_dates,
             ],
         )
         .mount("/api/actions/", routes![api::actions::load_new_articles,])

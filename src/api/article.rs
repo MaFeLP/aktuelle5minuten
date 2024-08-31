@@ -90,3 +90,21 @@ pub async fn get_article_by_key(conn: DbConn, key: String) -> Result<Json<Articl
 
     Ok(Json(article))
 }
+
+#[get("/dates")]
+pub async fn get_all_article_dates(conn: DbConn) -> Result<Json<Vec<String>>, Status> {
+    use crate::schema::articles::dsl;
+
+    let dates = conn
+        .run(move |c| {
+            dsl::articles
+                .select(diesel::dsl::date(dsl::date))
+                .distinct()
+                .order(dsl::date.desc())
+                .load::<String>(c)
+                .map_err(|_| Status::InternalServerError)
+        })
+        .await?;
+
+    Ok(Json(dates))
+}
