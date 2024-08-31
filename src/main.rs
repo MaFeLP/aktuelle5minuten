@@ -60,16 +60,6 @@ impl Fairing for MigrationsFairing {
     }
 }
 
-const DEFAULT_CATEGORIES: [&str; 7] = [
-    "Aktuelles Ereignis",
-    "Außenpolitik",
-    "Hamburg",
-    "Politik",
-    "Sonstiges",
-    "USA",
-    "Wirtschaft",
-];
-
 //const INDEX_HTML: &str = include_str!("../static/index.html");
 const INDEX_HTML: &str = "Hello World!";
 
@@ -121,4 +111,8 @@ fn rocket() -> _ {
             ],
         )
         .mount("/api/actions/", routes![api::actions::load_new_articles,])
+        .mount(
+            "/api/category/",
+            routes![api::category::get_all_categories,],
+        )
 }
