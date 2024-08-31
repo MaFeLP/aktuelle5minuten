@@ -6,6 +6,14 @@ mod schema;
 #[macro_use]
 extern crate rocket;
 
+#[macro_export]
+macro_rules! regex {
+    ($re:literal $(,)?) => {{
+        static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+        RE.get_or_init(|| regex::Regex::new($re).unwrap())
+    }};
+}
+
 use diesel::{sqlite::Sqlite, SqliteConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use rocket::fairing::{Fairing, Info, Kind};

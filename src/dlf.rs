@@ -1,3 +1,4 @@
+use crate::regex;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 
@@ -176,6 +177,14 @@ pub async fn article(href: &str) -> Result<Article, &'static str> {
         });
     }
 
+    // Remove figure and script tags from the article, as well as whitespace
+    let content_html = Html::parse_fragment(
+        regex!("(<figure.*?</figure>|<script.*?</script>|\\s{2,})")
+            .replace_all(&section.inner_html().replace("\n", ""), " ")
+            .to_string()
+            .trim(),
+    );
+
     Ok(Article {
         kicker: String::from(
             select_one!(header, "span.headline-kicker")
@@ -195,8 +204,8 @@ pub async fn article(href: &str) -> Result<Article, &'static str> {
                 .collect::<String>()
                 .trim(),
         ),
-        html: section.inner_html(),
-        plaintext: section.text().collect(),
+        html: content_html.root_element().inner_html(),
+        plaintext: content_html.root_element().text().collect(),
         figures,
         key: metadata.key,
         date: metadata.date,

@@ -52,6 +52,7 @@ dependencies = [
  "diesel",
  "diesel_migrations",
  "log",
+ "regex",
  "reqwest",
  "rocket",
  "rocket_sync_db_pools",
