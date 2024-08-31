@@ -102,6 +102,7 @@ fn rocket() -> _ {
             "/",
             routes![index, dates, tinder, pdflist, pdfcreate, files,],
         )
+        .mount("/api", routes![api::ai_status,])
         .mount(
             "/api/article/",
             routes![
