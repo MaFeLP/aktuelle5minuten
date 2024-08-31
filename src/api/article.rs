@@ -73,3 +73,20 @@ pub async fn get_first_article(
 
     Ok(Json(article))
 }
+
+#[get("/get?<key>")]
+pub async fn get_article_by_key(conn: DbConn, key: String) -> Result<Json<Article>, Status> {
+    use crate::schema::articles::dsl;
+
+    let article = conn
+        .run(move |c| {
+            dsl::articles
+                .select(Article::as_select())
+                .filter(dsl::key.eq(&key))
+                .first::<Article>(c)
+                .map_err(|_| Status::NotFound)
+        })
+        .await?;
+
+    Ok(Json(article))
+}

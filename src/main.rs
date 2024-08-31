@@ -112,6 +112,12 @@ fn rocket() -> _ {
             "/",
             routes![index, dates, tinder, pdflist, pdfcreate, files,],
         )
-        .mount("/api/article/", routes![api::article::get_first_article,])
+        .mount(
+            "/api/article/",
+            routes![
+                api::article::get_first_article,
+                api::article::get_article_by_key,
+            ],
+        )
         .mount("/api/actions/", routes![api::actions::load_new_articles,])
 }
