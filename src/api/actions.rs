@@ -5,7 +5,7 @@ use rocket::http::Status;
 // A route /api/actions/load that gets the latest dlf::wockenrueckblick and then inserts all the articles into the articles database
 #[get("/load")]
 pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
-    use crate::models::NewArticle;
+    use crate::models::Article;
     use crate::schema::articles::dsl::*;
 
     let wochenrueckblick_articles = dlf::wochenrueckblick()
@@ -13,7 +13,7 @@ pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
         .map_err(|_| Status::InternalServerError)?;
     for article in wochenrueckblick_articles {
         let article_key = article.key.clone();
-        let new_article = NewArticle::from(&article);
+        let new_article = Article::from(&article);
         let inserted_article = conn
             .run(move |c| {
                 diesel::insert_into(articles)

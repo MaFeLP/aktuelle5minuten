@@ -105,7 +105,7 @@ pub async fn wochenrueckblick() -> Result<Vec<PartialArticle>, &'static str> {
     Ok(articles)
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Debug)]
 pub struct Article {
     pub kicker: String,
     pub title: String,
@@ -118,7 +118,7 @@ pub struct Article {
     pub locale_date: String,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Debug)]
 pub struct Figure {
     pub src: String,
     pub alt: String,

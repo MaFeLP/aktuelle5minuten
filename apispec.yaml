@@ -317,47 +317,39 @@ components:
     article:
       description: "The article object"
       type: object
-      required: ["kicker", "title", "description", "content", "figures", "key", "date", "localeDate"]
+      required: ["key", "title", "teaserHeadline", "teaserText", "date", "localeDate", "kicker", "description", "content", "contentHtml", "figureSrc", "figureAlt", "figureSrcset", "figureTitle", "figureCaption"]
       properties:
-        kicker:
+        key:
           type: string
         title:
           type: string
-        description:
+        teaserHeadline:
           type: string
-        content:
-          type: object
-          required: ["html", "plaintext"]
-          properties:
-            html:
-              type: string
-            plaintext:
-              type: string
-        figures:
-          type: array
-          items:
-            type: object
-            required: ["image", "caption"]
-            properties:
-              image:
-                type: object
-                required: ["src", "alt", "srcset", "title"]
-                properties:
-                  src:
-                    type: string
-                  alt:
-                    type: string
-                  srcset:
-                    type: string
-                  title:
-                    type: string
-              caption:
-                type: string
-        key:
+        teaserText:
           type: string
         date:
           type: string
         localeDate:
+          type: string
+        kicker:
+          type: string
+        description:
+          type: string
+        content:
+          type: string
+        contentHtml:
+          type: string
+        figureSrc:
+          type: string
+        figureAlt:
+          type: string
+        figureSrcset:
+          type: string
+        figureTitle:
+          type: string
+        figureCaption:
+          type: string
+        category:
           type: string
     count:
       description: "Status about how many articles/categories exist in the database"
@@ -387,7 +379,7 @@ components:
       schema:
         type: string
     date:
-      name: articleDate
+      name: date
       description: "The date from which the article should be (in ISO format)"
       allowEmptyValue: true
       schema:

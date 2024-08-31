@@ -13,6 +13,12 @@ diesel::table! {
         content -> Nullable<Text>,
         category -> Nullable<Text>,
         status -> Integer,
+        content_html -> Nullable<Text>,
+        figure_src -> Nullable<Text>,
+        figure_alt -> Nullable<Text>,
+        figure_srcset -> Nullable<Text>,
+        figure_title -> Nullable<Text>,
+        figure_caption -> Nullable<Text>,
     }
 }
 
