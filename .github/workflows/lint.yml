@@ -27,17 +27,21 @@ jobs:
       - name: Setup node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 21
+          node-version: 22
           cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install
+        working-directory: "./frontend"
 
       - name: Lint frontend code
         run: pnpm lint
+        working-directory: "./frontend"
 
       - name: Check frontend code for errors
         run: pnpm check
+        working-directory: "./frontend"
 
   backend:
     runs-on: ubuntu-latest
@@ -46,17 +50,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Run rustfmt checks
+        run: cargo fmt -- --check
 
-      - name: Setup python dependency caching
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'poetry'
+      - name: Run Clippy
+        run: cargo clippy
 
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Check formatting
-        run: poetry run black --check app
