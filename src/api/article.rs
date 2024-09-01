@@ -1,4 +1,4 @@
-use crate::models::{Article, DATE_FORMAT};
+use crate::models::{Article, ArticleStatus, DATE_FORMAT};
 use crate::{dlf, DbConn};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper, Table};
 use rocket::{http::Status, serde::json::Json};
@@ -18,7 +18,7 @@ pub async fn get_first_article(
                 dsl::articles
                     .select(dsl::articles::all_columns())
                     .filter(diesel::dsl::date(dsl::date).eq(article_date))
-                    .filter(dsl::status.eq(0))
+                    .filter(dsl::status.eq(i32::from(ArticleStatus::Uncategorized)))
                     .select(Article::as_select())
                     .first::<Article>(c)
                     .map_err(|_| Status::NotFound)
@@ -29,7 +29,7 @@ pub async fn get_first_article(
             conn.run(|c| {
                 dsl::articles
                     .select(Article::as_select())
-                    .filter(dsl::status.eq(0))
+                    .filter(dsl::status.eq(i32::from(ArticleStatus::Uncategorized)))
                     .first::<Article>(c)
                     .map_err(|_| Status::NotFound)
             })
@@ -117,10 +117,11 @@ pub async fn demote_article(conn: DbConn, key: String) -> Result<Status, Status>
 
     conn.run(move |c| {
         diesel::update(dsl::articles.find(&key))
-            .set(dsl::status.eq(2))
+            .set(dsl::status.eq(i32::from(ArticleStatus::Demoted)))
             .execute(c)
             .map_err(|_| Status::InternalServerError)
-    }).await?;
+    })
+    .await?;
 
     Ok(Status::Created)
 }
@@ -142,12 +143,13 @@ pub async fn promote_article(conn: DbConn, query: PromoteQuery) -> Result<Status
     conn.run(move |c| {
         diesel::update(dsl::articles.find(&query.key))
             .set((
-                     dsl::status.eq(1),
-                    dsl::category.eq(&query.category)
+                dsl::status.eq(i32::from(ArticleStatus::Accepted)),
+                dsl::category.eq(&query.category),
             ))
             .execute(c)
             .map_err(|_| Status::InternalServerError)
-    }).await?;
+    })
+    .await?;
 
     Ok(Status::Created)
 }

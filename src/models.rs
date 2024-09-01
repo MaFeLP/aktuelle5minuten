@@ -103,3 +103,33 @@ impl From<&PartialArticle> for Article {
         }
     }
 }
+
+pub enum ArticleStatus {
+    Uncategorized,
+    Accepted,
+    Demoted,
+    BulletsCreated,
+}
+
+impl From<i32> for ArticleStatus {
+    fn from(status: i32) -> Self {
+        match status {
+            0 => ArticleStatus::Uncategorized,
+            1 => ArticleStatus::Accepted,
+            2 => ArticleStatus::Demoted,
+            3 => ArticleStatus::BulletsCreated,
+            _ => ArticleStatus::Uncategorized,
+        }
+    }
+}
+
+impl From<ArticleStatus> for i32 {
+    fn from(status: ArticleStatus) -> Self {
+        match status {
+            ArticleStatus::Uncategorized => 0,
+            ArticleStatus::Accepted => 1,
+            ArticleStatus::Demoted => 2,
+            ArticleStatus::BulletsCreated => 3,
+        }
+    }
+}

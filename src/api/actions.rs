@@ -1,3 +1,4 @@
+use crate::models::ArticleStatus;
 use crate::{dlf, DbConn};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
@@ -60,7 +61,7 @@ pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
         if inserted_article != 1 {
             conn.run(move |c| {
                 diesel::update(crate::schema::articles::table.filter(key.eq(&article_key)))
-                    .set(status.eq(0))
+                    .set(status.eq(i32::from(ArticleStatus::Uncategorized)))
                     .execute(c)
                     .map_err(|_| Status::InternalServerError)
             })
