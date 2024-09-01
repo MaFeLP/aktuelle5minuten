@@ -1,10 +1,10 @@
+#[macro_use]
+extern crate rocket;
 mod api;
 mod dlf;
 mod models;
 mod schema;
-
-#[macro_use]
-extern crate rocket;
+mod typst_helper;
 
 #[macro_export]
 macro_rules! regex {
@@ -125,6 +125,7 @@ fn rocket() -> _ {
             routes![
                 api::category::get_all_categories,
                 api::category::get_category_summary,
+                api::category::bullets,
             ],
         )
 }
