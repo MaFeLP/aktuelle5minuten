@@ -60,8 +60,10 @@ impl Fairing for MigrationsFairing {
     }
 }
 
-//const INDEX_HTML: &str = include_str!("../static/index.html");
-const INDEX_HTML: &str = "Hello World!";
+#[cfg(debug_assertions)]
+const INDEX_HTML: &str = include_str!("../frontend/dist/index.html");
+#[cfg(not(debug_assertions))]
+const INDEX_HTML: &str = include_str!("index.html");
 
 #[get("/")]
 async fn index() -> RawHtml<&'static str> {

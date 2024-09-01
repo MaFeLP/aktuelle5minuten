@@ -2,42 +2,48 @@
 FROM node:21-slim AS frontend
 WORKDIR /build
 RUN npm install -g pnpm
-COPY package.json pnpm-lock.yaml ./
+COPY frontend/package.json frontend/pnpm-lock.yaml ./
 RUN pnpm install
-COPY . .
+COPY frontend/ ./
 RUN pnpm build
 
-# Package the python backend as a .whl
-FROM python:3.12-bookworm AS flask
-WORKDIR /build
-RUN pip install poetry
-# Copy the version files for better caching (also copy the README.md so peoptry doesn't complain)
-COPY pyproject.toml poetry.lock README.md ./
-RUN pip install poetry && poetry install --no-root --no-directory
-# Copy the source files (copying from frontend, to also include the static frontend files)
-COPY --from=frontend /build/app/ /build/app/
-# Package the application
-RUN poetry build -f wheel
-
-
-FROM python:3.12-bookworm
-WORKDIR /data
-# sqlite is needed for the application to work
+# Create the rust backend
+FROM rust:1.80.1-slim-bookworm AS backend
 RUN apt-get update && apt-get install -y \
-    sqlite3 \
+    libsqlite3-dev libssl-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
-# The packaged sources
-COPY --from=flask /build/dist/*.whl /
-# Install the application and fix pdf-serving with a symlink:
-# /usr/local/lib/python3.12/site-packages/app/pdfs -> /data/pdfs
-RUN pip install --no-cache-dir /aktuelle5minuten-*-py3-none-any.whl \
-    && rm -rf /usr/local/lib/python3.12/site-packages/app/pdfs \
-    && mkdir /data/pdfs \
-    && ln -s /data/pdfs/ /usr/local/lib/python3.12/site-packages/app/pdfs
+WORKDIR /build
+COPY --from=frontend /build/dist/index.html ./src/index.html
+COPY . ./
+RUN --mount=type=cache,target=/build/target \
+    --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    set -eux; \
+    cargo build --release; \
+    objcopy --compress-debug-sections target/release/aktuelle5minuten ./main
 
 
+FROM debian:bookworm-slim
+WORKDIR /usr/share/aktuelle5minuten
+
+RUN apt-get update && apt-get install -y \
+    fonts-liberation \
+    sqlite3 \
+    openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=backend /build/main /usr/local/bin/aktuelle5minuten
+COPY --from=frontend /build/dist /usr/local/share/aktuelle5minuten
+
+# Default environment variables. Should only be touched, if you know what you are doing.
+ENV ROCKET_DATABASES='{sqlite_db={url="/data/db.sqlite3"}}'
+ENV ROCKET_ADDRESS=0.0.0.0
+ENV ROCKET_PORT=80
+
+# Deployment configuration
 EXPOSE 80/tcp
 VOLUME "/data"
+ENV DATA_PATH="/data/"
+ENV FONTS_DIR="/usr/share/fonts/truetype/liberation/"
 
-CMD ["gunicorn", "--bind", "0.0.0.0:80", "app:app"]
-
+CMD ["aktuelle5minuten"]

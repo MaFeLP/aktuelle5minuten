@@ -1,0 +1,9 @@
+/app/
+/.github/
+/backend/
+/fonts/
+/fonts.back/
+/frontend/dist/
+/frontend/node_modules/
+/target/
+
