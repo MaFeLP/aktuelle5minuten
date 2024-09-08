@@ -1,6 +1,7 @@
 use crate::regex;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 pub const PREFIX: &str = "https://www.deutschlandfunk.de/";
 const WOCKENRUECKBLICK_URL: &str = "https://www.deutschlandfunk.de/nachrichten/wochenueberblick";
@@ -14,10 +15,7 @@ macro_rules! select_one {
                     .expect(&format!("Failed to parse the selector '{}'", $selector)),
             )
             .next()
-            .expect(&format!(
-                "No matching element found for selector '{}'",
-                $selector
-            ))
+            .ok_or(ParseError::MissingKey($selector))?
     };
 }
 
@@ -35,9 +33,25 @@ pub struct PartialArticle {
     pub locale_date: String,
 }
 
-fn parse_partial_article(json: &str) -> Result<Option<PartialArticle>, &'static str> {
-    let json: serde_json::Value = serde_json::from_str(json).unwrap();
-    let value = json.get("value").unwrap();
+#[derive(Error, Debug)]
+pub enum ParseError {
+    /// Error parsing JSON
+    #[error("Error parsing JSON: {0}")]
+    Json(#[from] serde_json::Error),
+    /// The JSON type is not the expected one
+    #[error("Expected JSON type {0}")]
+    WrongJsonType(&'static str),
+    /// The JSON is missing a key
+    #[error("Missing key: {0}")]
+    MissingKey(&'static str),
+    /// The path in the URL does not have a prefix
+    #[error("Missing prefix")]
+    MissingPrefix,
+}
+
+fn parse_partial_article(json: &str) -> Result<Option<PartialArticle>, ParseError> {
+    let json: serde_json::Value = serde_json::from_str(json)?;
+    let value = json.get("value").ok_or(ParseError::MissingKey("value"))?;
     match value.get("__typename") {
         None => {
             match json.get("data") {
@@ -59,12 +73,18 @@ fn parse_partial_article(json: &str) -> Result<Option<PartialArticle>, &'static 
             Ok(None)
         }
         Some(typename) => {
-            let typename = typename.as_str().unwrap();
+            let typename = typename
+                .as_str()
+                .ok_or(ParseError::WrongJsonType("__typename"))?;
             if typename != "Teaser" {
                 debug!("Not a teaser article");
                 return Ok(None);
             }
-            let path = value.get("path").unwrap().as_str().unwrap();
+            let path = value
+                .get("path")
+                .ok_or(ParseError::MissingKey("value.path"))?
+                .as_str()
+                .unwrap();
 
             for url in NON_ARTICLE_URLS.iter() {
                 if path.starts_with(&format!("{}{}", PREFIX, url)) {
@@ -75,21 +95,30 @@ fn parse_partial_article(json: &str) -> Result<Option<PartialArticle>, &'static 
 
             // Add key from main json node to the value node
             let mut value = value.clone();
-            value["key"] = path.strip_prefix(PREFIX).unwrap().into();
-            let parsed: PartialArticle =
-                serde_json::from_value(value.clone()).expect("Parsing the article went wrong!");
+            value["key"] = path
+                .strip_prefix(PREFIX)
+                .ok_or(ParseError::MissingPrefix)?
+                .into();
+            let parsed: PartialArticle = serde_json::from_value(value.clone())?;
             Ok(Some(parsed))
         }
     }
 }
 
-pub async fn wochenrueckblick() -> Result<Vec<PartialArticle>, &'static str> {
-    let body = reqwest::get(WOCKENRUECKBLICK_URL)
-        .await
-        .map_err(|_| "Could not retrieve the webpage")?
-        .text()
-        .await
-        .map_err(|_| "Could not retrieve the webpage's text")?;
+#[derive(Error, Debug)]
+pub enum DlfError {
+    #[error("Reqwest error: {0}")]
+    Reqwest(#[from] reqwest::Error),
+    #[error("Parse error: {0}")]
+    Parse(#[from] ParseError),
+    #[error("Response error: {0}")]
+    Response(&'static str),
+    #[error("Prefix error")]
+    Prefix,
+}
+
+pub async fn wochenrueckblick() -> Result<Vec<PartialArticle>, DlfError> {
+    let body = reqwest::get(WOCKENRUECKBLICK_URL).await?.text().await?;
 
     let document = Html::parse_document(&body);
     let script_selector = Selector::parse("script").unwrap();
@@ -128,24 +157,28 @@ pub struct Figure {
     pub caption: String,
 }
 
-pub async fn article(href: &str) -> Result<Article, &'static str> {
+pub async fn article(href: &str) -> Result<Article, DlfError> {
     if !href.starts_with(PREFIX) {
-        return Err("Is not a DLF Article");
+        return Err(DlfError::Prefix);
     }
 
-    let response = reqwest::get(href).await.unwrap();
+    let response = reqwest::get(href).await?;
     if response.status() != 200 {
-        return Err("Could not download article!");
+        return Err(DlfError::Response("Could not download article!"));
     }
 
-    let html = response.text().await.unwrap();
+    let html = response.text().await?;
     let document = Html::parse_document(&html);
 
     // Parse head
     let head = select_one!(document, "head");
     let mut metadata: Option<PartialArticle> = None;
     for script in head.select(&Selector::parse("script.js-client-queries").unwrap()) {
-        metadata = parse_partial_article(script.attr("data-json").unwrap()).unwrap();
+        metadata = parse_partial_article(
+            script
+                .attr("data-json")
+                .ok_or(ParseError::MissingKey("data-json"))?,
+        )?;
         if metadata.is_some() {
             break;
         }

@@ -21,6 +21,7 @@ typst = "0.11.1"
 typst-pdf = "0.11.1"
 comemo = "0.4.0"
 ttf-parser = "0.24.1"
+thiserror = "1.0.63"
 
 [dev-dependencies]
 tokio = "1.40.0"

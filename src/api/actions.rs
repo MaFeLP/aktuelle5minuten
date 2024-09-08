@@ -42,9 +42,10 @@ pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
     use crate::models::Article;
     use crate::schema::articles::dsl::*;
 
-    let wochenrueckblick_articles = dlf::wochenrueckblick()
-        .await
-        .map_err(|_| Status::InternalServerError)?;
+    let wochenrueckblick_articles = dlf::wochenrueckblick().await.map_err(|why| {
+        error!("Failed to fetch Wochenrückblick articles: {:?}", why);
+        Status::InternalServerError
+    })?;
     for article in wochenrueckblick_articles {
         let article_key = article.key.clone();
         let new_article = Article::from(&article);
@@ -55,7 +56,10 @@ pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
                     .on_conflict(key)
                     .do_nothing()
                     .execute(c)
-                    .map_err(|_| Status::InternalServerError)
+                    .map_err(|why| {
+                        error!("Failed to insert article {}: {:?}", &new_article.key, why);
+                        Status::InternalServerError
+                    })
             })
             .await?;
         if inserted_article != 1 {

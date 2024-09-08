@@ -60,6 +60,7 @@ dependencies = [
  "scraper",
  "serde",
  "serde_json",
+ "thiserror",
  "time",
  "tokio",
  "ttf-parser 0.24.1",
