@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     sqlite3 \
     openssl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=backend /build/main /usr/local/bin/aktuelle5minuten
