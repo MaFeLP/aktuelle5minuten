@@ -12,6 +12,22 @@ docker run -d --rm \
     ghcr.io/MaFeLP/aktuelle5minuten:main
 ```
 
+## Configuration
+Aktuelle 5 Minuten is configured via environment variables. Use the `-e A5M_CONFIG=foobar` command line option to run the docker container.
+You can also an `.env` file with the `--env-file aktuelle5minuten.env` command file option.
+
+| Environment Variable | Description | Value | Default |
+| --- | --- | --- | --- |
+| `A5M_AI_CHATGPT` | If the ChatGPT button should be displayed on the bullet point creation page. | boolean | `false` |
+| `A5M_AI_CLAUDE` | If the Claude AI button should be displayed on the bullet point creation page. | boolean | `false` |
+| `A5M_ASSETS_PATH` | Where the html and javascript files are stored **only change when you know what you are doing** | Path (string) | `/usr/local/share/aktuelle5minuten/` |
+| `A5M_DATA_PATH` | Where the data (created pdfs, the sqlite-database) should be stored. | Path (string) | `/data/` |
+| `A5M_FONTS_DIR` | Where the fonts for the pdf creation should be stored | Path (string) | `/usr/share/fonts/liberation/` |
+| `A5M_PDF_AUTHOR`| The author that should be used in the generated PDF  | String | `Default Author` |
+| `A5M_PDF_TITLE` | The title of the PDF | String | `Aktuelle 5 Minuten` |
+| `TZ` | The timezone used to determine local time. Used for example in the pdf date determination | String | `Etc/UTC` |
+
+
 ## Build
 > [!NOTE]
 > You need to change the server URL for your API to match your environment.

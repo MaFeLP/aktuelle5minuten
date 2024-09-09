@@ -24,7 +24,7 @@ RUN --mount=type=cache,target=/build/target \
 
 
 FROM debian:bookworm-slim
-WORKDIR /usr/share/aktuelle5minuten
+WORKDIR /data
 
 RUN apt-get update && apt-get install -y \
     fonts-liberation \
@@ -44,7 +44,5 @@ ENV ROCKET_PORT=80
 # Deployment configuration
 EXPOSE 80/tcp
 VOLUME "/data"
-ENV DATA_PATH="/data/"
-ENV FONTS_DIR="/usr/share/fonts/truetype/liberation/"
 
 CMD ["aktuelle5minuten"]

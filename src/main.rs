@@ -90,9 +90,28 @@ async fn pdfcreate() -> RawHtml<&'static str> {
     RawHtml(INDEX_HTML)
 }
 
-#[get("/<file..>", rank = 2)]
+#[get("/<file..>", rank = 3)]
 async fn files(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("static/").join(file)).await.ok()
+    NamedFile::open(
+        Path::new(
+            &std::env::var("A5M_ASSETS_PATH")
+                .unwrap_or("/usr/local/share/aktuelle5minuten/".to_string()),
+        )
+        .join(file),
+    )
+    .await
+    .ok()
+}
+
+#[get("/files/<file..>", rank = 2)]
+async fn pdf_files(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(
+        Path::new(&std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string()))
+            .join("pdfs")
+            .join(file),
+    )
+    .await
+    .ok()
 }
 
 #[launch]
@@ -102,7 +121,7 @@ fn rocket() -> _ {
         .attach(MigrationsFairing)
         .mount(
             "/",
-            routes![index, dates, tinder, pdflist, pdfcreate, files,],
+            routes![index, dates, tinder, pdflist, pdfcreate, files, pdf_files,],
         )
         .mount("/api", routes![api::ai_status, api::count,])
         .mount(

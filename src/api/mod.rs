@@ -22,8 +22,10 @@ pub fn ai_status() -> Json<AiStatus> {
         "1", "true", "TRUE", "True", "yes", "YES", "Yes", "on", "ON", "On",
     ];
     Json(AiStatus {
-        chatgpt: TRUTHY_VALUES.contains(&std::env::var("CHATGPT").unwrap_or_default().as_str()),
-        claude: TRUTHY_VALUES.contains(&std::env::var("CLAUDE").unwrap_or_default().as_str()),
+        chatgpt: TRUTHY_VALUES
+            .contains(&std::env::var("A5M_AI_CHATGPT").unwrap_or_default().as_str()),
+        claude: TRUTHY_VALUES
+            .contains(&std::env::var("A5M_AI_CLAUDE").unwrap_or_default().as_str()),
     })
 }
 

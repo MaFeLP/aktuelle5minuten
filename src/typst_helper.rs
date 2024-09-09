@@ -26,7 +26,7 @@ pub struct SystemWorld {
 impl SystemWorld {
     pub fn new(source: String) -> Self {
         let fonts = std::fs::read_dir(
-            std::env::var("FONTS_DIR").unwrap_or("/usr/share/fonts/liberation/".to_string()),
+            std::env::var("A5M_FONTS_DIR").unwrap_or("/usr/share/fonts/liberation/".to_string()),
         )
         .expect("Could not read fonts from disk")
         .map(Result::unwrap)

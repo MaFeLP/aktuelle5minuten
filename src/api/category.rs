@@ -103,11 +103,11 @@ pub async fn bullets(conn: DbConn, bullets: Form<BulletsForm<'_>>) -> Result<Red
     let mut content = include_str!("typst_template.typ")
         .replace(
             "{{ author }}",
-            &std::env::var("PDF_AUTHOR").unwrap_or("Default_author".to_string()),
+            &std::env::var("A5M_PDF_AUTHOR").unwrap_or("Default Author".to_string()),
         )
         .replace(
             "{{ title }}",
-            &std::env::var("PDF_TITLE").unwrap_or("Aktuelle 5 Minuten".to_string()),
+            &std::env::var("A5M_PDF_TITLE").unwrap_or("Aktuelle 5 Minuten".to_string()),
         );
 
     let bullets = conn
@@ -158,7 +158,7 @@ pub async fn bullets(conn: DbConn, bullets: Form<BulletsForm<'_>>) -> Result<Red
 
     let now = time::OffsetDateTime::now_utc();
     let pdf = typst_pdf::pdf(&document, Smart::Auto, None);
-    let path = PathBuf::from(std::env::var("DATA_PATH").unwrap_or("/data".to_string()))
+    let path = PathBuf::from(std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string()))
         .join("pdfs")
         .join(format!("{}.pdf", now.format(&DATETIME_FORMAT).unwrap()));
     std::fs::write(path, pdf).expect("Failed to write pdf");
