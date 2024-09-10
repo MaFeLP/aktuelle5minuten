@@ -13,7 +13,7 @@ importers:
         version: 2.13.5
       '@sveltejs/vite-plugin-svelte':
         specifier: ^3.1.2
-        version: 3.1.2(svelte@4.2.19)(vite@5.4.2(sass@1.77.8))
+        version: 3.1.2(svelte@4.2.19)(vite@5.4.3(sass@1.77.8))
       '@tsconfig/svelte':
         specifier: ^5.0.4
         version: 5.0.4
@@ -22,7 +22,7 @@ importers:
         version: 5.2.10
       autoprefixer:
         specifier: ^10.4.20
-        version: 10.4.20(postcss@8.4.41)
+        version: 10.4.20(postcss@8.4.45)
       bootstrap:
         specifier: ^5.3.3
         version: 5.3.3(@popperjs/core@2.11.8)
@@ -51,8 +51,8 @@ importers:
         specifier: ^5.5.4
         version: 5.5.4
       vite:
-        specifier: ^5.4.2
-        version: 5.4.2(sass@1.77.8)
+        specifier: ^5.4.3
+        version: 5.4.3(sass@1.77.8)
 
 packages:
 
@@ -822,8 +822,8 @@ packages:
   postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
 
-  postcss@8.4.41:
-    resolution: {integrity: sha512-TesUflQ0WKZqAvg52PWL6kHgLKP6xB6heTOdoYM0Wt2UHyxNa4K25EZZMgKns3BH1RLVbZCREPpLY0rhnNoHVQ==}
+  postcss@8.4.45:
+    resolution: {integrity: sha512-7KTLTdzdZZYscUc65XmjFiB73vBhBfbPztCYdUNvlaso9PrzjzcmjqBPR0lNGkcVlcO4BjiO5rK/qNz+XAen1Q==}
     engines: {node: ^10 || ^12 || >=14}
 
   prettier-plugin-svelte@3.2.6:
@@ -993,8 +993,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  vite@5.4.2:
-    resolution: {integrity: sha512-dDrQTRHp5C1fTFzcSaMxjk6vdpKvT+2/mIdE07Gw2ykehT49O0z/VHS3zZ8iV/Gh8BJJKHWOe5RjaNrW5xf/GA==}
+  vite@5.4.3:
+    resolution: {integrity: sha512-IH+nl64eq9lJjFqU+/yrRnrHPVTlgy42/+IzbOdaFDVlyLgI/wDlf+FCobXLX1cT0X5+7LMyH1mIy2xJdLfo8Q==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -1279,26 +1279,26 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.21.0':
     optional: true
 
-  '@sveltejs/vite-plugin-svelte-inspector@2.1.0(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.2(sass@1.77.8)))(svelte@4.2.19)(vite@5.4.2(sass@1.77.8))':
+  '@sveltejs/vite-plugin-svelte-inspector@2.1.0(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.3(sass@1.77.8)))(svelte@4.2.19)(vite@5.4.3(sass@1.77.8))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 3.1.2(svelte@4.2.19)(vite@5.4.2(sass@1.77.8))
+      '@sveltejs/vite-plugin-svelte': 3.1.2(svelte@4.2.19)(vite@5.4.3(sass@1.77.8))
       debug: 4.3.4
       svelte: 4.2.19
-      vite: 5.4.2(sass@1.77.8)
+      vite: 5.4.3(sass@1.77.8)
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.2(sass@1.77.8))':
+  '@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.3(sass@1.77.8))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 2.1.0(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.2(sass@1.77.8)))(svelte@4.2.19)(vite@5.4.2(sass@1.77.8))
+      '@sveltejs/vite-plugin-svelte-inspector': 2.1.0(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.3(sass@1.77.8)))(svelte@4.2.19)(vite@5.4.3(sass@1.77.8))
       debug: 4.3.4
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.10
       svelte: 4.2.19
       svelte-hmr: 0.16.0(svelte@4.2.19)
-      vite: 5.4.2(sass@1.77.8)
-      vitefu: 0.2.5(vite@5.4.2(sass@1.77.8))
+      vite: 5.4.3(sass@1.77.8)
+      vitefu: 0.2.5(vite@5.4.3(sass@1.77.8))
     transitivePeerDependencies:
       - supports-color
 
@@ -1339,14 +1339,14 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  autoprefixer@10.4.20(postcss@8.4.41):
+  autoprefixer@10.4.20(postcss@8.4.45):
     dependencies:
       browserslist: 4.23.3
       caniuse-lite: 1.0.30001649
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.0.1
-      postcss: 8.4.41
+      postcss: 8.4.45
       postcss-value-parser: 4.2.0
 
   axios@1.7.4:
@@ -1756,7 +1756,7 @@ snapshots:
 
   postcss-value-parser@4.2.0: {}
 
-  postcss@8.4.41:
+  postcss@8.4.45:
     dependencies:
       nanoid: 3.3.7
       picocolors: 1.0.1
@@ -1937,18 +1937,18 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  vite@5.4.2(sass@1.77.8):
+  vite@5.4.3(sass@1.77.8):
     dependencies:
       esbuild: 0.21.5
-      postcss: 8.4.41
+      postcss: 8.4.45
       rollup: 4.21.0
     optionalDependencies:
       fsevents: 2.3.3
       sass: 1.77.8
 
-  vitefu@0.2.5(vite@5.4.2(sass@1.77.8)):
+  vitefu@0.2.5(vite@5.4.3(sass@1.77.8)):
     optionalDependencies:
-      vite: 5.4.2(sass@1.77.8)
+      vite: 5.4.3(sass@1.77.8)
 
   wcwidth@1.0.1:
     dependencies:
