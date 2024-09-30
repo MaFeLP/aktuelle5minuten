@@ -22,7 +22,7 @@
     "bootstrap-icons": "^1.11.3",
     "prettier": "^3.3.3",
     "prettier-plugin-svelte": "^3.2.6",
-    "sass": "^1.78.0",
+    "sass": "^1.79.4",
     "svelte": "^4.2.19",
     "svelte-check": "^4.0.2",
     "tslib": "^2.7.0",
