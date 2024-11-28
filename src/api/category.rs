@@ -10,6 +10,7 @@ use std::path::PathBuf;
 use time::macros::format_description;
 use typst::diag::Severity;
 use typst::foundations::Smart;
+use typst_pdf::{PdfOptions, PdfStandard, PdfStandards};
 
 const DEFAULT_CATEGORIES: [&str; 7] = [
     "Aktuelles Ereignis",
@@ -130,36 +131,55 @@ pub async fn bullets(conn: DbConn, bullets: Form<BulletsForm<'_>>) -> Result<Red
 
     // Compile the document with typst
     let world = SystemWorld::new(content);
-    let mut tracer = typst::eval::Tracer::default();
-    let document = match typst::compile(&world, &mut tracer) {
-        Ok(d) => d,
-        Err(e) => {
-            error!("Failed to compile typst document");
-            for diagnostic in tracer.warnings().iter().chain(e.iter()) {
-                match diagnostic.severity {
-                    Severity::Error => {
-                        error!("{}", diagnostic.message);
-                        for hint in &diagnostic.hints {
-                            error!("hint: {}", hint);
-                        }
-                        for point in &diagnostic.trace {
-                            error!("at {:?}:{}", point.span, point.v);
-                        }
-                    }
-                    Severity::Warning => {
-                        warn!("{}", diagnostic.message);
-                        for hint in &diagnostic.hints {
-                            warn!("hint: {}", hint);
-                        }
-                    }
+    let compile_result = typst::compile(&world);
+    let document = compile_result
+        .output
+        .expect("Failed to compile the typst document!");
+    for diagnostic in compile_result.warnings {
+        match diagnostic.severity {
+            Severity::Error => {
+                error!("{}", diagnostic.message);
+                for hint in &diagnostic.hints {
+                    error!("hint: {}", hint);
+                }
+                for point in &diagnostic.trace {
+                    error!("at {:?}:{}", point.span, point.v);
                 }
             }
-            panic!("Failed to compile typst document");
+            Severity::Warning => {
+                warn!("{}", diagnostic.message);
+                for hint in &diagnostic.hints {
+                    warn!("hint: {}", hint);
+                }
+            }
         }
-    };
+    }
 
     let now = time::OffsetDateTime::now_utc();
-    let pdf = typst_pdf::pdf(&document, Smart::Auto, None);
+    let options = PdfOptions {
+        ident: Smart::Auto,
+        timestamp: Some(
+            typst::foundations::Datetime::from_ymd_hms(
+                now.year(),
+                now.month().into(),
+                now.day(),
+                now.hour(),
+                now.minute(),
+                now.second(),
+            )
+            .unwrap(),
+        ),
+        page_ranges: None, // Export all pages
+        standards: PdfStandards::new(&[PdfStandard::A_2b]).unwrap(),
+    };
+
+    let pdf = match typst_pdf::pdf(&document, &options) {
+        Ok(p) => p,
+        Err(err) => {
+            error!("Could not render the typst pdf: {:?}", err);
+            return Err(Status::InternalServerError);
+        }
+    };
     let pdf_directory =
         PathBuf::from(std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string())).join("pdfs");
     if !pdf_directory.as_path().exists() {

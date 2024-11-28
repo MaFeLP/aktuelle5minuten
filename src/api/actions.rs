@@ -72,5 +72,5 @@ pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
             .await?;
         }
     }
-    Ok(Status::Ok)
+    Ok(Status::Created)
 }

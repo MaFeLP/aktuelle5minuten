@@ -1,8 +1,9 @@
-use comemo::Prehashed;
+use std::path::PathBuf;
 use typst::diag::FileResult;
 use typst::foundations::{Bytes, Datetime};
 use typst::syntax::{FileId, Source};
 use typst::text::{Font, FontBook};
+use typst::utils::LazyHash;
 use typst::Library;
 
 /// Main interface that determines the environment for Typst.
@@ -11,10 +12,10 @@ pub struct SystemWorld {
     source: Source,
 
     /// The standard library.
-    library: Prehashed<Library>,
+    library: LazyHash<Library>,
 
     /// Metadata about all known fonts.
-    book: Prehashed<FontBook>,
+    book: LazyHash<FontBook>,
 
     /// Metadata about all known fonts.
     fonts: Vec<Font>,
@@ -25,7 +26,7 @@ pub struct SystemWorld {
 
 impl SystemWorld {
     pub fn new(source: String) -> Self {
-        let fonts = std::fs::read_dir(
+        let fonts: Vec<Font> = std::fs::read_dir(
             std::env::var("A5M_FONTS_DIR")
                 .unwrap_or("/usr/share/fonts/truetype/liberation/".to_string()),
         )
@@ -46,8 +47,8 @@ impl SystemWorld {
         .collect();
 
         Self {
-            library: Prehashed::new(Library::default()),
-            book: Prehashed::new(FontBook::from_fonts(&fonts)),
+            library: LazyHash::new(Library::default()),
+            book: LazyHash::new(FontBook::from_fonts(&fonts)),
             fonts,
             source: Source::detached(source),
             time: time::OffsetDateTime::now_utc(),
@@ -60,23 +61,27 @@ impl SystemWorld {
 /// I have tried to keep it as minimal as possible
 impl typst::World for SystemWorld {
     /// Standard library.
-    fn library(&self) -> &Prehashed<Library> {
+    fn library(&self) -> &LazyHash<Library> {
         &self.library
     }
 
     /// Metadata about all known Books.
-    fn book(&self) -> &Prehashed<FontBook> {
+    fn book(&self) -> &LazyHash<FontBook> {
         &self.book
     }
 
     /// Accessing the main source file.
-    fn main(&self) -> Source {
-        self.source.clone()
+    fn main(&self) -> FileId {
+        self.source.id()
     }
 
     /// Accessing a specified source file (based on `FileId`).
-    fn source(&self, _: FileId) -> FileResult<Source> {
-        panic!("Not implemented")
+    fn source(&self, file_id: FileId) -> FileResult<Source> {
+        if file_id != self.source.id() {
+            Err(typst::diag::FileError::NotFound(PathBuf::new()))
+        } else {
+            Ok(self.source.clone())
+        }
     }
 
     /// Accessing a specified file (non-file).
