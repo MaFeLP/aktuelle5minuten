@@ -1,4 +1,4 @@
-use crate::models::{ArticleStatus, DATETIME_FORMAT};
+use crate::models::ArticleStatus;
 use crate::typst_helper::SystemWorld;
 use crate::{regex, DbConn};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
@@ -7,6 +7,7 @@ use rocket::response::Redirect;
 use rocket::{http::Status, serde::json::Json};
 use serde::Serialize;
 use std::path::PathBuf;
+use time::macros::format_description;
 use typst::diag::Severity;
 use typst::foundations::Smart;
 
@@ -114,6 +115,7 @@ pub async fn bullets(conn: DbConn, bullets: Form<BulletsForm<'_>>) -> Result<Red
         .run(move |c| {
             print_dsl::print_articles
                 .select((print_dsl::category, print_dsl::bullets))
+                .filter(print_dsl::printed.eq(false))
                 .load::<(String, String)>(c)
                 .map_err(|_| Status::InternalServerError)
         })
@@ -122,7 +124,7 @@ pub async fn bullets(conn: DbConn, bullets: Form<BulletsForm<'_>>) -> Result<Red
     info!("Found {} categories to print to the pdf", bullets.len());
 
     for (category, bullets) in bullets {
-        content.push_str(&format!("= {}\n", category));
+        content.push_str(&format!("\n\n= {}\n", category));
         content.push_str(&bullets);
     }
 
@@ -158,12 +160,33 @@ pub async fn bullets(conn: DbConn, bullets: Form<BulletsForm<'_>>) -> Result<Red
 
     let now = time::OffsetDateTime::now_utc();
     let pdf = typst_pdf::pdf(&document, Smart::Auto, None);
-    let path = PathBuf::from(std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string()))
-        .join("pdfs")
-        .join(format!("{}.pdf", now.format(&DATETIME_FORMAT).unwrap()));
+    let pdf_directory =
+        PathBuf::from(std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string())).join("pdfs");
+    if !pdf_directory.as_path().exists() {
+        std::fs::create_dir_all(&pdf_directory)
+            .expect("Could not create pdf directory on the filesystem");
+    }
+    let filename = format!(
+        "{}.pdf",
+        now.format(format_description!(
+            "[year]-[month]-[day]T[hour]:[minute]:[second]"
+        ))
+        .unwrap()
+    );
+    let path = pdf_directory.join(&filename);
     std::fs::write(path, pdf).expect("Failed to write pdf");
 
-    let pdf_uri = format!("/pdfs/{}.pdf", now.format(&DATETIME_FORMAT).unwrap());
+    let affected = conn
+        .run(move |c| {
+            diesel::update(print_dsl::print_articles)
+                .set(print_dsl::printed.eq(true))
+                .execute(c)
+                .map_err(|_| Status::InternalServerError)
+        })
+        .await?;
+    info!("{} articles have been marked as printed", affected);
+
+    let pdf_uri = format!("/pdfs/{}", &filename);
 
     Ok(Redirect::to(pdf_uri))
 }
@@ -180,6 +203,7 @@ pub async fn get_all_categories(
             dsl::articles
                 .select(dsl::category)
                 .filter(dsl::category.is_not_null())
+                .filter(dsl::status.eq(i32::from(ArticleStatus::Accepted)))
                 .distinct()
                 .load::<Option<String>>(c)
                 .map_err(|_| Status::InternalServerError)
@@ -191,7 +215,7 @@ pub async fn get_all_categories(
         .collect();
 
     if let Some(print) = print {
-        if print {
+        if !print {
             for category in DEFAULT_CATEGORIES {
                 if !categories.contains(&category.to_string()) {
                     categories.push(category.to_string());

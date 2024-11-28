@@ -103,7 +103,7 @@ async fn files(file: PathBuf) -> Option<NamedFile> {
     .ok()
 }
 
-#[get("/files/<file..>", rank = 2)]
+#[get("/pdfs/<file..>", rank = 2)]
 async fn pdf_files(file: PathBuf) -> Option<NamedFile> {
     NamedFile::open(
         Path::new(&std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string()))
@@ -123,7 +123,7 @@ fn rocket() -> _ {
             "/",
             routes![index, dates, tinder, pdflist, pdfcreate, files, pdf_files,],
         )
-        .mount("/api", routes![api::ai_status, api::count,])
+        .mount("/api", routes![api::ai_status, api::count, api::files,])
         .mount(
             "/api/article/",
             routes![

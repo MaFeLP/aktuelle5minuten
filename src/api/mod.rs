@@ -4,6 +4,7 @@ use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
 use rocket::serde::json::Json;
 use serde::Serialize;
+use std::path::PathBuf;
 use time::Date;
 
 pub(crate) mod actions;
@@ -77,4 +78,22 @@ pub async fn count(conn: DbConn, date: Option<String>) -> Result<Json<CountRespo
             categories,
         }))
     }
+}
+
+#[get("/files")]
+pub async fn files() -> Result<Json<Vec<String>>, Status> {
+    let pdfs: Vec<String> = std::fs::read_dir(
+        PathBuf::from(std::env::var("A5M_DATA_DIR").unwrap_or("/data".to_string())).join("pdfs"),
+    )
+    .map_err(|err| {
+        error!("Error reading the PDF list from disk: {:?}", err);
+        Status::InternalServerError
+    })?
+    .map(|name| {
+        let name = name.unwrap();
+        name.file_name().into_string().unwrap()
+    })
+    .collect();
+
+    Ok(Json(pdfs))
 }
