@@ -103,25 +103,27 @@ async fn files(file: PathBuf) -> Option<NamedFile> {
     .ok()
 }
 
-#[get("/pdfs/<file..>", rank = 2)]
-async fn pdf_files(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(
-        Path::new(&std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string()))
-            .join("pdfs")
-            .join(file),
-    )
-    .await
-    .ok()
-}
-
 #[launch]
 fn rocket() -> _ {
+    // Create the file structure to store pdfs
+    let path =
+        PathBuf::from(std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string())).join("pdfs");
+    std::fs::create_dir_all(&path).expect("Could not create the file structure to store pdfs!");
+
+    // Configure the rocket instance
     rocket::build()
         .attach(DbConn::fairing())
         .attach(MigrationsFairing)
         .mount(
             "/",
-            routes![index, dates, tinder, pdflist, pdfcreate, files, pdf_files,],
+            routes![index, dates, tinder, pdflist, pdfcreate, files,],
+        )
+        .mount(
+            "/files",
+            rocket::fs::FileServer::from(
+                Path::new(&std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string()))
+                    .join("pdfs"),
+            ),
         )
         .mount("/api", routes![api::ai_status, api::count, api::files,])
         .mount(

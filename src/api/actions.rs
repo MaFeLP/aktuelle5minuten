@@ -67,7 +67,10 @@ pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
                 diesel::update(crate::schema::articles::table.filter(key.eq(&article_key)))
                     .set(status.eq(i32::from(ArticleStatus::Uncategorized)))
                     .execute(c)
-                    .map_err(|_| Status::InternalServerError)
+                    .map_err(|err| {
+                        error!("Failed to update article {}: {}", &article_key, err);
+                        Status::InternalServerError
+                    })
             })
             .await?;
         }
