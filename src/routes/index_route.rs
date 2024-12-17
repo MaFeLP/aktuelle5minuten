@@ -1,4 +1,4 @@
-use crate::server_error;
+use crate::ServerError;
 use rocket::http::Status;
 use rocket_dyn_templates::{context, Template};
 use std::ops::Sub;
@@ -15,8 +15,8 @@ pub(crate) async fn index() -> Result<Template, Status> {
     Ok(Template::render(
         "index",
         context! {
-            start_date: server_error!("Could not format the date: {}", today.format(format_description!("[year]-[month]-[day]")))?.to_string(),
-            end_date: server_error!("Could not format the date: {}", last_week.format(format_description!("[year]-[month]-[day]")))?.to_string(),
+            start_date: today.format(format_description!("[year]-[month]-[day]")).map_err(|err| ServerError::DateFormat(err))?.to_string(),
+            end_date: last_week.format(format_description!("[year]-[month]-[day]")).map_err(|err| ServerError::DateFormat(err))?.to_string(),
         },
     ))
 }

@@ -12,16 +12,6 @@ use typst::diag::Severity;
 use typst::foundations::Smart;
 use typst_pdf::{PdfOptions, PdfStandard, PdfStandards};
 
-const DEFAULT_CATEGORIES: [&str; 7] = [
-    "Aktuelles Ereignis",
-    "Außenpolitik",
-    "Hamburg",
-    "Politik",
-    "Sonstiges",
-    "USA",
-    "Wirtschaft",
-];
-
 #[derive(FromForm)]
 pub struct BulletsForm<'a> {
     #[field(validate = len(1..63))]
@@ -216,41 +206,9 @@ pub async fn get_all_categories(
     conn: DbConn,
     print: Option<bool>,
 ) -> Result<Json<Vec<String>>, Status> {
-    use crate::schema::articles::dsl;
-
-    let mut categories: Vec<String> = conn
-        .run(move |c| {
-            dsl::articles
-                .select(dsl::category)
-                .filter(dsl::category.is_not_null())
-                .filter(dsl::status.eq(i32::from(ArticleStatus::Accepted)))
-                .distinct()
-                .load::<Option<String>>(c)
-                .map_err(|_| Status::InternalServerError)
-        })
-        .await?
-        .iter()
-        // We can safely unwrap here, as the filter in the query filters out non-null values.
-        .map(|c| c.as_ref().unwrap().clone())
-        .collect();
-
-    if let Some(print) = print {
-        if !print {
-            for category in DEFAULT_CATEGORIES {
-                if !categories.contains(&category.to_string()) {
-                    categories.push(category.to_string());
-                }
-            }
-        }
-    } else {
-        for category in DEFAULT_CATEGORIES {
-            categories.push(category.to_string());
-        }
-    }
-
-    categories.sort();
-
-    Ok(Json(categories))
+    Ok(Json(
+        crate::util::tinder::get_categories(&conn, print.unwrap_or(false)).await?,
+    ))
 }
 
 #[derive(Serialize, Debug)]

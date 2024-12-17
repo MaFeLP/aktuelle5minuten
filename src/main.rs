@@ -19,25 +19,10 @@ macro_rules! regex {
     }};
 }
 
-#[macro_export]
-macro_rules! server_error {
-    ($err:expr) => {
-        $err.map_err(|err| {
-            error!("Internal Server Error: {}", err);
-            rocket::http::Status::InternalServerError
-        })
-    };
-    ($reason:literal, $err:expr) => {{
-        $err.map_err(|err| {
-            error!($reason, err);
-            rocket::http::Status::InternalServerError
-        })
-    }};
-}
-
 use diesel::{sqlite::Sqlite, SqliteConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use rocket::fairing::{Fairing, Info, Kind};
+use rocket::http::Status;
 use rocket::{Orbit, Rocket};
 use rocket_dyn_templates::handlebars::{
     Context, Handlebars, Helper, HelperResult, Output, RenderContext, RenderError,
@@ -48,6 +33,25 @@ use rocket_sync_db_pools::database;
 use std::path::{Path, PathBuf};
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
+
+#[derive(thiserror::Error, Debug)]
+pub(crate) enum ServerError {
+    #[error("Database error: {0}")]
+    DatabaseError(#[from] diesel::result::Error),
+    #[error("Date format error: {0}")]
+    DateFormat(#[from] time::error::Format),
+    #[error("Date parse error: {0}")]
+    DateParse(#[from] time::error::Parse),
+    #[error("No articles found!")]
+    NotFound,
+}
+
+impl From<ServerError> for Status {
+    fn from(err: ServerError) -> Self {
+        error!("{}", err);
+        Status::InternalServerError
+    }
+}
 
 #[database("sqlite_db")]
 pub struct DbConn(SqliteConnection);
@@ -171,6 +175,10 @@ fn rocket() -> _ {
         )
         .mount(
             "/htmx",
-            routes![htmx::load_new_dlf_articles, htmx::tinder::demote_article,],
+            routes![
+                htmx::load_new_dlf_articles,
+                htmx::tinder::promote_article,
+                htmx::tinder::demote_article,
+            ],
         )
 }

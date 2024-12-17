@@ -39,8 +39,8 @@
             </button>
             <button
                 class="select-btn col btn btn-outline-danger"
-                hx-delete="/htmx/tinder?key={{article_key}}"
-                hx-target="#tinder-card"
+                hx-delete="/htmx/tinder?key={{article_key}}&date={{date}}"
+                hx-target="div#tinder-container"
                 onclick="updateProgressBar()"
             >
                 <i class="bi bi-x-lg"></i>

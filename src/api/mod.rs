@@ -1,5 +1,5 @@
 use crate::models::DATE_FORMAT;
-use crate::{server_error, DbConn};
+use crate::{DbConn, ServerError};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
 use rocket::serde::json::Json;
@@ -53,10 +53,11 @@ pub async fn count(conn: DbConn, date: Option<String>) -> Result<Json<CountRespo
         let date = Date::parse(&date, DATE_FORMAT).map_err(|_| Status::BadRequest)?;
         let articles = conn
             .run(move |c| {
-                server_error!(dsl::articles
+                dsl::articles
                     .select(diesel::dsl::count_star())
                     .filter(diesel::dsl::date(dsl::date).eq(date))
-                    .first::<i64>(c))
+                    .first::<i64>(c)
+                    .map_err(|err| ServerError::DatabaseError(err))
             })
             .await?;
         Ok(Json(CountResponse {
@@ -66,9 +67,10 @@ pub async fn count(conn: DbConn, date: Option<String>) -> Result<Json<CountRespo
     } else {
         let articles = conn
             .run(|c| {
-                server_error!(dsl::articles
+                dsl::articles
                     .select(diesel::dsl::count_star())
-                    .first::<i64>(c))
+                    .first::<i64>(c)
+                    .map_err(|err| ServerError::DatabaseError(err))
             })
             .await?;
         Ok(Json(CountResponse {

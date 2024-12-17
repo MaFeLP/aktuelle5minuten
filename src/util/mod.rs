@@ -1,1 +1,2 @@
-pub mod typst;
+pub(crate) mod tinder;
+pub(crate) mod typst;
