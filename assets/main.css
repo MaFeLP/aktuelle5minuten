@@ -1,0 +1,179 @@
+/*
+ * Default styles that should apply to everything
+ */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif, serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+/*
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+*/
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1 {
+  line-height: 1.1;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#app {
+  margin: 0 auto;
+}
+
+main {
+  padding: 2rem;
+}
+
+.vertline {
+  border-right: thin solid var(--bs-secondary-color);
+  opacity: 50%;
+}
+
+/*
+ * Styles used to make the accordion nice
+ */
+details.accordion-item:not([open]) .accordion-button {
+    background-color: var(--bs-accordion-bg);
+}
+
+details.accordion-item:not([open]):last-of-type .accordion-button {
+    border-bottom-right-radius: var(--bs-accordion-border-radius);
+    border-bottom-left-radius: var(--bs-accordion-border-radius);
+}
+
+details.accordion-item:not([open]) .accordion-button::after {
+    background-image: var(--bs-accordion-btn-active-icon);
+    transform: unset;
+}
+
+details.accordion-item[open] .accordion-button::after {
+    background-image: var(--bs-accordion-btn-icon);
+    transform: var(--bs-accordion-btn-icon-transform);
+}
+
+/* Hide the default disclosure triangle on Safari */
+summary.accordion-button::-webkit-details-marker {
+    display: none;
+}
+
+
+
+/*
+ * Styles provided by Deutschlandfunk
+ */
+.u-space-bottom-xl {
+  margin-bottom: 1em;
+}
+
+.u-text-italic {
+  font-style: italic;
+}
+
+
+/*
+ * Styles on the index page
+ */
+main#index {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  text-align: center;
+  gap: 1.5em;
+
+  #logo {
+    height: 12em;
+    will-change: filter;
+    transition: filter 300ms;
+  }
+
+  #selectors {
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    align-content: center;
+    margin: auto;
+  }
+}
+
+
+/*
+ * Dialog specific styles
+ */
+dialog {
+  border: 1px solid rgba(0,0,0,.2);
+  border-radius: .3rem;
+  outline: 0;
+
+  form {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .modal-footer {
+    gap: 1rem;
+  }
+}
+
+/* Set a nice fade-in and out animation for dialogs */
+dialog {
+  animation: fade-out 0.2s ease-out;
+}
+
+dialog[open] {
+  animation: fade-in 0.2s ease-out;
+}
+
+dialog[open]::backdrop {
+  animation: backdrop-fade-in 0.2s ease-out forwards;
+}
+
+/* Animation keyframes */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    display: none;
+  }
+
+  100% {
+    opacity: 1;
+    display: block;
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+    display: block;
+  }
+
+  100% {
+    opacity: 0;
+    display: none;
+  }
+}
+
+@keyframes backdrop-fade-in {
+  0% {
+    background-color: rgb(0 0 0 / 0%);
+  }
+
+  100% {
+    background-color: rgb(0 0 0 / 50%);
+  }
+}
+

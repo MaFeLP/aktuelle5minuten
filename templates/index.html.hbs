@@ -1,0 +1,124 @@
+{{#*inline "content"}}
+  <main id="index">
+    <img id="logo" src="/assets/img/news.svg" alt="News Logo" />
+    <h1>Aktuelle 5 Minuten</h1>
+
+    <div id="selectors">
+      <a href="/pdflist" class="btn btn-outline-secondary">PDF Dateien auflisten</a>
+      <button id="show-dialog-button" class="btn btn-primary">Neue Artikel laden</button>
+      <a href="/dates" class="btn btn-success">Nachrichten Tinder spielen</a>
+      <a href="/pdfcreate" class="btn btn-outline-warning">PDF erstellen</a>
+      <button id="delete-btn" class="btn btn-danger" onclick="showConfirmationDialog()">Artikel älter als 1mo löschen</button>
+    </div>
+  </main>
+
+  <!-- LoadArticles Dialog -->
+  <dialog id="load-articles-dialog">
+    <div id="modal-header">
+      <h5 class="modal-title" style="margin-right: auto;">Neue Artikel laden?</h5>
+      <button type="button" style="margin-right: 0;" class="btn-close" aria-label="Close" onclick="dialog.close()"></button>
+    </div>
+
+    <hr />
+
+    <div id="form-container" class="modal-body">
+      <form method="get" action="/htmx/actions/load/dlf">
+        <div>
+          <label for="startDate" class="form-label">Von</label>
+          <input  id="startDate" class="form-control" type="date" readonly value="{{ start_date }}" aria-valuemax="{{ end_date }}"/>
+          <label for="endDate" class="form-label">bis</label>
+          <input  id="endDate" class="form-control" type="date" readonly value="{{ end_date }}" aria-valuemax="{{ end_date }}"/>
+        </div>
+        <button class="btn btn-outline-primary" style="height: 71px;" type="submit">
+          <img
+              src="/assets/img/deutschlandfunk.svg"
+              alt="Deutschlandfunk Logo"
+              width="278"
+              height="48"
+          />
+        </button>
+      </form>
+
+      <div class="vertline"></div>
+      <hr />
+
+      <form method="get" action="/htmx/actions/load/tagesschau">
+        <div>
+          <label for="startDate" class="form-label">Von</label>
+          <input  id="startDate" class="form-control" type="date" value="{{ start_date }}" aria-valuemax="{{ end_date }}"/>
+          <label for="endDate" class="form-label">bis</label>
+          <input  id="endDate" class="form-control" type="date" value="{{ end_date }}" aria-valuemax="{{ end_date }}"/>
+        </div>
+
+          <button class="btn btn-outline-primary disabled" style="width: 278px;" type="submit">
+              <img
+                  src="/assets/img/tagesschau.svg"
+                  alt="Tagesschau Logo"
+                  width="174"
+                  height="57"
+              />
+          </button>
+       </form>
+    </div>
+  </dialog>
+
+  <script>
+      let showButton = document.querySelector("button#show-dialog-button");
+      let dialog = document.querySelector("dialog#load-articles-dialog");
+      showButton.addEventListener("click", () => {
+          dialog.showModal();
+      });
+
+      function showConfirmationDialog() {
+          let element = document.querySelector("button#delete-btn");
+
+          if (
+              window.confirm("Artikel älter als einen Monat unwiderruflich löschen?")
+          ) {
+              element.className = "btn btn-outline-danger disabled";
+              element.innterHtml = '<span role="status">Laden... </span><span class="spinner-border spinner-border-sm" aria-hidden="true"></span>';
+              fetch("/api/actions/clean")
+                  .then(() => {
+                      console.info("Cleaned old articles");
+                      element.className = "btn btn-outline-success disabled";
+                      element.innerHTML = `<span role="status">Gelöscht!</span> <i class="bi bi-check2-square" />`;
+                  })
+                  .catch((err) => {
+                      alert("Fehler! Neue Artikel konnten nicht importiert werden!");
+                      console.error("Could not load new articles into the database!", err);
+                  });
+          }
+      }
+  </script>
+
+  <style>
+      dialog#load-articles-dialog {
+          div#modal-header {
+              display: flex;
+              flex-direction: row;
+          }
+
+          div#form-container {
+              display: flex;
+              flex-direction: column;
+              gap: 1em;
+
+              @media (width > 550px) {
+                  flex-direction: row;
+
+                  hr {
+                      display: none;
+                  }
+              }
+
+              form {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 1em;
+              }
+          }
+      }
+  </style>
+
+{{/inline}}
+{{> base htmx=false}}

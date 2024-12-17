@@ -1,0 +1,35 @@
+{{#*inline "content" }}
+    <a href="/" id="back-link" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+        Zurück zur Startseite
+    </a>
+
+    <main style="margin-top: 75px;">
+        <h4>Aktuelle 5 Minuten &mdash; Generierte PDF-Dateien</h4>
+        <div id="fileList" class="btn-group-vertical">
+            {{#each files}}
+            <a
+                class="btn btn-outline-secondary"
+                href="/files/{{this}}"
+                target="_blank"
+                style="text-align: start;"
+            >
+                {{this}}
+            </a>
+            {{/each}}
+        </div>
+    </main>
+
+    <style>
+        #fileList {
+            width: 100%;
+        }
+
+        #back-link {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+        }
+    </style>
+{{/inline}}
+{{> base htmx=false}}

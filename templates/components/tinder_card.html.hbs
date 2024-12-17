@@ -1,0 +1,50 @@
+<div id="tinder-card" class="card">
+    <img
+        class="card-img-top"
+        loading="lazy"
+        src="{{figure_src}}"
+        alt="{{figure_alt}}"
+        srcset="{{figure_srcset}}"
+        title="{{figure_title}}"
+    />
+    <div class="card-body">
+        <h5 class="card-title">{{article_kicker}} - {{article_title}}</h5>
+        <small class="card-subtitle">
+            {{release_date_time}}
+        </small>
+
+        <hr />
+
+        <div class="card-text">
+            <div class="accordion border-bottom-0">
+                <details class="accordion-item border-bottom-0">
+                    <summary class="accordion-button rounded-top">
+                            {{html article_description}}
+                    </summary>
+                    <div class="accordion-body border-bottom">
+                        <p>{{html article_content_html}}</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <hr />
+
+        <div id="button-row" class="row align-items-center">
+            <button
+                class="select-btn col btn btn-outline-success"
+                onclick="openPromoteDialog()"
+            >
+                <i class="bi bi-check2"></i>
+            </button>
+            <button
+                class="select-btn col btn btn-outline-danger"
+                hx-delete="/htmx/tinder?key={{article_key}}"
+                hx-target="#tinder-card"
+                onclick="updateProgressBar()"
+            >
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+</div>

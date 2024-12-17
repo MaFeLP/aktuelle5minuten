@@ -1,0 +1,64 @@
+<dialog id="promote-dialog">
+    <form hx-post="/htmx/tinder?key={{article_key}}" hx-target="tinder-card" method="dialog">
+        <div class="modal-header">
+            <h5 class="modal-title">Post aufnehmen!</h5>
+        </div>
+
+        <hr />
+
+        <div class="modal-body">
+            <label for="category-input" class="form-label">Kategorie auswählen</label>
+            <input
+                class="form-control"
+                list="categories-options"
+                id="category-input"
+                placeholder="Innenpolitik"
+                minlength="1"
+                maxlength="63"
+            />
+            <datalist id="categories-options">
+                {{#each categories}}
+                    <option value="{{ this }}"> </option>
+                {{/each}}
+            </datalist>
+        </div>
+
+        <hr />
+
+        <div class="modal-footer">
+            <button id="dialog-submit-btn" class="btn btn-success" type="submit">Abschicken</button>
+            <button
+                id="dialog-cancel-btn"
+                class="btn btn-outline-danger"
+                value="cancel"
+                onclick="closePromoteDialog()"
+                type="reset">Abbrechen</button
+            >
+        </div>
+    </form>
+</dialog>
+
+<style>
+    dialog {
+        border: 1px solid rgba(0, 0, 0, .2);
+        border-radius: .3rem;
+        outline: 0;
+
+        form {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 500px;
+
+            .modal-footer {
+                gap: 1rem;
+            }
+
+            #category-input {
+                width: 64em;
+                max-width: 100%;
+            }
+        }
+    }
+</style>

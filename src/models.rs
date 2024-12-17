@@ -2,8 +2,8 @@
 //! Holds structures for the database models.
 //!
 
-use crate::dlf;
-use crate::dlf::PartialArticle;
+use crate::scrapers::dlf;
+use crate::scrapers::dlf::PartialArticle;
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 use serde::Serialize;
 use time::format_description::BorrowedFormatItem;
@@ -29,15 +29,15 @@ pub struct Article {
     pub kicker: Option<String>,
     pub description: Option<String>,
     pub content: Option<String>,
-    content_html: Option<String>,
+    pub content_html: Option<String>,
 
-    figure_src: Option<String>,
-    figure_alt: Option<String>,
-    figure_srcset: Option<String>,
-    figure_title: Option<String>,
-    figure_caption: Option<String>,
+    pub figure_src: Option<String>,
+    pub figure_alt: Option<String>,
+    pub figure_srcset: Option<String>,
+    pub figure_title: Option<String>,
+    pub figure_caption: Option<String>,
 
-    category: Option<String>,
+    pub category: Option<String>,
     /// 0: Uncategorized
     /// 1: Accepted
     /// 2: Demoted, do not print (can be deleted)

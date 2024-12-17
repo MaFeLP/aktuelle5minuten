@@ -1,0 +1,41 @@
+{{#*inline "content"}}
+    {{#if has_dates}}
+        <section class="content">
+            <h2>Dates</h2>
+            <div>Bitte wähle ein Datum aus, von welchem die Artikel kategorisiert werden sollen</div>
+            <div id="selectors" class="btn-group-vertical" role="group">
+                <a href="/tinder" class="btn btn-outline-secondary">Alle Tage</a>
+                {{#each dates}}
+                    <a href="/tinder?date={{ this.iso }}" class="btn btn-outline-secondary">
+                        {{this.string}}
+                    </a>
+                {{/each}}
+            </div>
+        </section>
+    {{ else }}
+        <div class="alert alert-note">
+            <h2 class="alert-heading"></h2>
+            <div>Aktuell sind keine Artikel in der Datenbank!</div>
+        </div>
+    {{/if}}
+
+    <style>
+        section.content {
+            margin: 1em;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            gap: 0.3em;
+
+            a {
+                width: fit-content;
+            }
+        }
+    </style>
+{{/inline}}
+{{> base }}

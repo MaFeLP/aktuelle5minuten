@@ -1,0 +1,55 @@
+use crate::DbConn;
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use rocket::http::Status;
+use rocket::serde::Serialize;
+use rocket_dyn_templates::{context, Template};
+use time::macros::format_description;
+use time::Date;
+
+#[get("/dates")]
+pub(crate) async fn dates(db: DbConn) -> Result<Template, Status> {
+    use crate::schema::articles::dsl;
+
+    #[derive(Serialize)]
+    struct TemplateDate {
+        string: String,
+        iso: String,
+    }
+
+    impl TryFrom<Date> for TemplateDate {
+        type Error = time::error::Format;
+
+        fn try_from(date: Date) -> Result<Self, Self::Error> {
+            Ok(Self {
+                string: date
+                    .format(format_description!("[year]-[month]-[day]"))?
+                    .to_string(),
+                iso: date
+                    .format(format_description!("[year]-[month]-[day]"))?
+                    .to_string(),
+            })
+        }
+    }
+
+    let dates: Vec<TemplateDate> = db
+        .run(move |c| {
+            dsl::articles
+                .select(diesel::dsl::date(dsl::date))
+                .distinct()
+                .order(dsl::date.asc())
+                .load::<Date>(c)
+                .map_err(|_| Status::InternalServerError)
+        })
+        .await?
+        .into_iter()
+        .filter_map(|date| TemplateDate::try_from(date).ok())
+        .collect();
+
+    Ok(Template::render(
+        "dates",
+        context! {
+            has_dates: !dates.is_empty(),
+            dates: dates,
+        },
+    ))
+}

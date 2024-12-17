@@ -1,5 +1,5 @@
 use crate::models::ArticleStatus;
-use crate::typst_helper::SystemWorld;
+use crate::util::typst::SystemWorld;
 use crate::{regex, DbConn};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::form::{Form, FromForm};
@@ -295,7 +295,7 @@ pub async fn get_category_summary(
 
 #[cfg(test)]
 mod test {
-    use crate::typst_helper::SystemWorld;
+    use crate::util::typst::SystemWorld;
     use typst::diag::Severity;
     use typst::foundations::Smart;
 

@@ -1,5 +1,6 @@
 use crate::models::{Article, ArticleStatus, DATE_FORMAT};
-use crate::{dlf, DbConn};
+use crate::scrapers::dlf;
+use crate::DbConn;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper, Table};
 use rocket::{http::Status, serde::json::Json};
 use time::Date;

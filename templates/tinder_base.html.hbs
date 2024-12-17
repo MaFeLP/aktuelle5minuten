@@ -1,0 +1,82 @@
+<main>
+    <section class="content">
+        {{#if has_articles}}
+            <div
+                class="progress"
+                role="progressbar"
+                aria-label="Tinder Progress"
+                aria-valuenow="1"
+                aria-valuemin="0"
+                aria-valuemax="{{max_articles}}"
+            >
+                <div
+                    class="progress-bar overflow-visible text-dark bg-info"
+                    style="width: {{initial_percentage}}%;"
+                >
+                    1/{{max_articles}}
+                </div>
+            </div>
+
+            {{> components/tinder_card }}
+
+            {{> components/promote_dialog }}
+
+        {{else}}
+            <div class="alert alert-success">
+                <h3 class="alert-heading">
+                    Keine Artikel zum Tindern in der Datenbank!
+                </h3>
+            </div>
+        {{/if}}
+    </section>
+</main>
+
+<script>
+    let progressBarCounter = 0;
+    let progressContainer = document.querySelector('div.progress');
+    let progressBar = document.querySelector('div.progress-bar');
+    function updateProgressBar() {
+        progressBarCounter++;
+        progressContainer.setAttribute('aria-valuenow', progressBarCounter);
+        progressBar.innerText = `${progressBarCounter}/{{max_articles}}`;
+        let width = Math.round(progressBarCounter/{{max_articles}} * 100);
+        progressBar.style['width'] = width + "%";
+    }
+
+    function openPromoteDialog() {
+        document.getElementById("promote-dialog").showModal();
+    }
+    function closePromoteDialog() {
+        document.getElementById("promote-dialog").close();
+    }
+</script>
+
+<style>
+    main {
+        display: flex;
+        flex-direction: column;
+        place-content: center;
+        gap: 1.5em;
+        padding: 0 5vw;
+
+        section {
+            max-width: 1024px;
+            width: 90vw;
+            margin: 1em auto;
+        }
+
+        #tinder-card {
+            margin: 1em 0;
+        }
+
+        #button-row {
+            display: flex;
+            align-content: center;
+            justify-content: start;
+        }
+
+        .select-btn {
+            margin: 0 25px;
+        }
+    }
+</style>

@@ -1,10 +1,15 @@
+#![warn(clippy::unwrap_used)]
+#![warn(clippy::clone_on_copy)]
+
 #[macro_use]
 extern crate rocket;
 mod api;
-mod dlf;
+mod htmx;
 mod models;
+mod routes;
 mod schema;
-mod typst_helper;
+mod scrapers;
+mod util;
 
 #[macro_export]
 macro_rules! regex {
@@ -14,14 +19,35 @@ macro_rules! regex {
     }};
 }
 
+#[macro_export]
+macro_rules! server_error {
+    ($err:expr) => {
+        $err.map_err(|err| {
+            error!("Internal Server Error: {}", err);
+            rocket::http::Status::InternalServerError
+        })
+    };
+    ($reason:literal, $err:expr) => {{
+        $err.map_err(|err| {
+            error!($reason, err);
+            rocket::http::Status::InternalServerError
+        })
+    }};
+}
+
 use diesel::{sqlite::Sqlite, SqliteConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use rocket::fairing::{Fairing, Info, Kind};
-use rocket::{fs::NamedFile, response::content::RawHtml, Orbit, Rocket};
+use rocket::{Orbit, Rocket};
+use rocket_dyn_templates::handlebars::{
+    Context, Handlebars, Helper, HelperResult, Output, RenderContext, RenderError,
+    RenderErrorReason,
+};
+use rocket_dyn_templates::Template;
 use rocket_sync_db_pools::database;
 use std::path::{Path, PathBuf};
 
-pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
+const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 #[database("sqlite_db")]
 pub struct DbConn(SqliteConnection);
@@ -60,47 +86,22 @@ impl Fairing for MigrationsFairing {
     }
 }
 
-#[cfg(debug_assertions)]
-const INDEX_HTML: &str = include_str!("../frontend/dist/index.html");
-#[cfg(not(debug_assertions))]
-const INDEX_HTML: &str = include_str!("index.html");
-
-#[get("/")]
-async fn index() -> RawHtml<&'static str> {
-    RawHtml(INDEX_HTML)
-}
-
-#[get("/dates")]
-async fn dates() -> RawHtml<&'static str> {
-    RawHtml(INDEX_HTML)
-}
-
-#[get("/tinder")]
-async fn tinder() -> RawHtml<&'static str> {
-    RawHtml(INDEX_HTML)
-}
-
-#[get("/pdflist")]
-async fn pdflist() -> RawHtml<&'static str> {
-    RawHtml(INDEX_HTML)
-}
-
-#[get("/pdfcreate")]
-async fn pdfcreate() -> RawHtml<&'static str> {
-    RawHtml(INDEX_HTML)
-}
-
-#[get("/<file..>", rank = 3)]
-async fn files(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(
-        Path::new(
-            &std::env::var("A5M_ASSETS_PATH")
-                .unwrap_or("/usr/local/share/aktuelle5minuten/".to_string()),
-        )
-        .join(file),
-    )
-    .await
-    .ok()
+fn html_raw_helper_checked(
+    h: &Helper,
+    _: &Handlebars,
+    _: &Context,
+    _: &mut RenderContext,
+    out: &mut dyn Output,
+) -> HelperResult {
+    Ok(out.write(
+        h.param(0)
+            .ok_or(RenderError::from(RenderErrorReason::ParamNotFoundForIndex(
+                "0", 0,
+            )))?
+            .value()
+            .as_str()
+            .ok_or(RenderErrorReason::InvalidParamType("string"))?,
+    )?)
 }
 
 #[launch]
@@ -114,9 +115,26 @@ fn rocket() -> _ {
     rocket::build()
         .attach(DbConn::fairing())
         .attach(MigrationsFairing)
+        .attach(Template::custom(|engines| {
+            engines
+                .handlebars
+                .register_helper("html", Box::new(html_raw_helper_checked))
+        }))
         .mount(
             "/",
-            routes![index, dates, tinder, pdflist, pdfcreate, files,],
+            routes![
+                routes::index,
+                routes::dates,
+                routes::tinder,
+                routes::pdflist,
+                routes::pdfcreate,
+            ],
+        )
+        .mount(
+            "/assets",
+            rocket::fs::FileServer::from(Path::new(
+                &std::env::var("A5M_ASSETS_PATH").unwrap_or("/app/assets/".to_string()),
+            )),
         )
         .mount(
             "/files",
@@ -127,7 +145,7 @@ fn rocket() -> _ {
         )
         .mount("/api", routes![api::ai_status, api::count, api::files,])
         .mount(
-            "/api/article/",
+            "/api/article",
             routes![
                 api::article::get_first_article,
                 api::article::get_article_by_key,
@@ -137,18 +155,22 @@ fn rocket() -> _ {
             ],
         )
         .mount(
-            "/api/actions/",
+            "/api/actions",
             routes![
                 api::actions::load_new_articles,
                 api::actions::clean_articles,
             ],
         )
         .mount(
-            "/api/category/",
+            "/api/category",
             routes![
                 api::category::get_all_categories,
                 api::category::get_category_summary,
                 api::category::bullets,
             ],
+        )
+        .mount(
+            "/htmx",
+            routes![htmx::load_new_dlf_articles, htmx::tinder::demote_article,],
         )
 }

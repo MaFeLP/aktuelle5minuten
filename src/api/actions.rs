@@ -1,5 +1,6 @@
 use crate::models::ArticleStatus;
-use crate::{dlf, DbConn};
+use crate::scrapers::dlf;
+use crate::DbConn;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
 use std::ops::Sub;

@@ -1,5 +1,5 @@
 use crate::models::DATE_FORMAT;
-use crate::DbConn;
+use crate::{server_error, DbConn};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
 use rocket::serde::json::Json;
@@ -53,11 +53,10 @@ pub async fn count(conn: DbConn, date: Option<String>) -> Result<Json<CountRespo
         let date = Date::parse(&date, DATE_FORMAT).map_err(|_| Status::BadRequest)?;
         let articles = conn
             .run(move |c| {
-                dsl::articles
+                server_error!(dsl::articles
                     .select(diesel::dsl::count_star())
                     .filter(diesel::dsl::date(dsl::date).eq(date))
-                    .first::<i64>(c)
-                    .map_err(|_| Status::InternalServerError)
+                    .first::<i64>(c))
             })
             .await?;
         Ok(Json(CountResponse {
@@ -67,10 +66,9 @@ pub async fn count(conn: DbConn, date: Option<String>) -> Result<Json<CountRespo
     } else {
         let articles = conn
             .run(|c| {
-                dsl::articles
+                server_error!(dsl::articles
                     .select(diesel::dsl::count_star())
-                    .first::<i64>(c)
-                    .map_err(|_| Status::InternalServerError)
+                    .first::<i64>(c))
             })
             .await?;
         Ok(Json(CountResponse {
@@ -83,7 +81,7 @@ pub async fn count(conn: DbConn, date: Option<String>) -> Result<Json<CountRespo
 #[get("/files")]
 pub async fn files() -> Result<Json<Vec<String>>, Status> {
     let pdfs: Vec<String> = std::fs::read_dir(
-        PathBuf::from(std::env::var("A5M_DATA_DIR").unwrap_or("/data".to_string())).join("pdfs"),
+        PathBuf::from(std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string())).join("pdfs"),
     )
     .map_err(|err| {
         error!("Error reading the PDF list from disk: {:?}", err);
