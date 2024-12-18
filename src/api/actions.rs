@@ -10,14 +10,18 @@ pub async fn clean_articles(conn: DbConn) -> Result<Status, Status> {
     use crate::schema::articles::dsl;
     use crate::schema::print_articles::dsl as print_dsl;
 
+    let one_month_ago = time::OffsetDateTime::now_utc()
+        .sub(time::Duration::days(30))
+        .date();
+
     // Delete all articles older than one month
     let deleted = conn
         .run(move |c| {
-            diesel::delete(dsl::articles.filter(dsl::date.lt(
-                diesel::dsl::now.sub(diesel::dsl::sql::<diesel::sql_types::Interval>("'1 month'")),
-            )))
-            .execute(c)
-            .map_err(|_| Status::InternalServerError)
+            // Perform the delete operation
+            diesel::delete(dsl::articles)
+                .filter(dsl::date.lt(one_month_ago.to_string()))
+                .execute(c)
+                .map_err(|_| Status::InternalServerError)
         })
         .await?;
 

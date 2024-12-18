@@ -1,4 +1,5 @@
-use crate::DbConn;
+use crate::models::ArticleStatus;
+use crate::{DbConn, ServerError};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
 use rocket::serde::Serialize;
@@ -36,9 +37,13 @@ pub(crate) async fn dates(db: DbConn) -> Result<Template, Status> {
             dsl::articles
                 .select(diesel::dsl::date(dsl::date))
                 .distinct()
+                .filter(dsl::status.eq(i32::from(ArticleStatus::Uncategorized)))
                 .order(dsl::date.asc())
                 .load::<Date>(c)
-                .map_err(|_| Status::InternalServerError)
+                .map_err(|err| {
+                    error!("Failed to load dates: {}", err);
+                    ServerError::DatabaseError(err)
+                })
         })
         .await?
         .into_iter()
