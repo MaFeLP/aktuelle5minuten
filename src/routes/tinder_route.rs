@@ -6,7 +6,18 @@ use time::macros::format_description;
 
 #[get("/tinder?<date>")]
 pub(crate) async fn tinder(conn: DbConn, date: Option<String>) -> Result<Template, Status> {
-    let article = get_first_article(&conn, date.clone()).await?;
+    let article = match get_first_article(&conn, date.clone()).await? {
+        Some(article) => article,
+        None => {
+            return Ok(Template::render(
+                "tinder",
+                context! {
+                    has_articles: false,
+                    date: date.unwrap_or_default(),
+                },
+            ))
+        }
+    };
     let number_of_articles = count_articles(&conn, date.clone()).await?;
     let categories = get_categories(&conn, false).await?;
     cache_next_article(conn, date.clone());

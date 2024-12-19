@@ -47,20 +47,28 @@ pub async fn promote_article(conn: DbConn, form: Form<PromoteForm>) -> Result<Te
         }
     };
 
-    next_tinder_card(conn, date).await?
+    next_tinder_card(conn, date).await
 }
 
-async fn next_tinder_card(
-    conn: DbConn,
-    date: Option<String>,
-) -> Result<Result<Template, Status>, Status> {
-    let article = get_first_article(&conn, date.clone()).await?;
+async fn next_tinder_card(conn: DbConn, date: Option<String>) -> Result<Template, Status> {
+    let article = match get_first_article(&conn, date.clone()).await? {
+        Some(article) => article,
+        None => {
+            return Ok(Template::render(
+                "tinder_base",
+                context! {
+                    has_articles: false,
+                    date: date.unwrap_or_default(),
+                },
+            ));
+        }
+    };
     let number_of_articles = count_articles(&conn, date.clone()).await?;
     let categories = get_categories(&conn, false).await?;
     cache_next_article(conn, date.clone());
 
     // Round to a percentage and give back as an i32
-    Ok(Ok(Template::render(
+    Ok(Template::render(
         "tinder_base",
         context! {
             categories: categories,
@@ -83,7 +91,7 @@ async fn next_tinder_card(
             article_content_html: &article.content_html,
             article_key: &article.key,
         },
-    )))
+    ))
 }
 
 #[delete("/tinder?<key>&<date>")]
@@ -102,5 +110,5 @@ pub async fn demote_article(
     })
     .await?;
 
-    next_tinder_card(conn, date).await?
+    next_tinder_card(conn, date).await
 }

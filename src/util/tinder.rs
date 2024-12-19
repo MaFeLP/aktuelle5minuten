@@ -76,7 +76,7 @@ pub(crate) fn cache_next_article(conn: DbConn, date: Option<String>) {
 pub(crate) async fn get_first_article(
     conn: &DbConn,
     date: Option<String>,
-) -> Result<Article, ServerError> {
+) -> Result<Option<Article>, ServerError> {
     use crate::schema::articles::dsl;
 
     let article = match date {
@@ -106,11 +106,8 @@ pub(crate) async fn get_first_article(
     };
     let mut article = match article {
         Some(a) => a,
-        None => {
-            return Err(ServerError::NotFound);
-        }
+        None => return Ok(None),
     };
-    dbg!(&article);
     if article.content.is_some() {
         info!("Found article with key '{}' in cache.", article.key);
     } else {
@@ -121,7 +118,7 @@ pub(crate) async fn get_first_article(
         article = download_and_parse_dlf_article(conn, article).await?;
     }
 
-    Ok(article)
+    Ok(Some(article))
 }
 
 async fn download_and_parse_dlf_article(
