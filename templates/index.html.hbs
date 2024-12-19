@@ -1,3 +1,34 @@
+{{#* inline "head" }}
+  <style>
+    dialog#load-articles-dialog {
+      div#modal-header {
+        display: flex;
+        flex-direction: row;
+      }
+
+      div#form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+
+        @media (width > 550px) {
+          flex-direction: row;
+
+          hr {
+            display: none;
+          }
+        }
+
+        form {
+          display: flex;
+          flex-direction: column;
+          gap: 1em;
+        }
+      }
+    }
+  </style>
+{{/inline}}
+
 {{#*inline "content"}}
   <main id="index">
     <img id="logo" src="/assets/img/news.svg" alt="News Logo" />
@@ -90,35 +121,5 @@
           }
       }
   </script>
-
-  <style>
-      dialog#load-articles-dialog {
-          div#modal-header {
-              display: flex;
-              flex-direction: row;
-          }
-
-          div#form-container {
-              display: flex;
-              flex-direction: column;
-              gap: 1em;
-
-              @media (width > 550px) {
-                  flex-direction: row;
-
-                  hr {
-                      display: none;
-                  }
-              }
-
-              form {
-                  display: flex;
-                  flex-direction: column;
-                  gap: 1em;
-              }
-          }
-      }
-  </style>
-
 {{/inline}}
 {{> base htmx=false}}

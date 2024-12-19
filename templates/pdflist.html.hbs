@@ -1,3 +1,17 @@
+{{#* inline "head" }}
+  <style>
+    #fileList {
+      width: 100%;
+    }
+
+    #back-link {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+    }
+  </style>
+{{/inline}}
+
 {{#*inline "content" }}
     <a href="/" id="back-link" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left"></i>
@@ -19,17 +33,5 @@
             {{/each}}
         </div>
     </main>
-
-    <style>
-        #fileList {
-            width: 100%;
-        }
-
-        #back-link {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-        }
-    </style>
 {{/inline}}
 {{> base htmx=false}}

@@ -1,3 +1,24 @@
+{{#* inline "head"}}
+  <style>
+    section.content {
+      margin: 1em;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      -webkit-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      gap: 0.3em;
+
+      a {
+        width: fit-content;
+      }
+    }
+  </style>
+{{/inline}}
+
 {{#*inline "content"}}
     {{#if has_dates}}
         <section class="content">
@@ -18,24 +39,5 @@
             <div>Aktuell sind keine Artikel in der Datenbank!</div>
         </div>
     {{/if}}
-
-    <style>
-        section.content {
-            margin: 1em;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            -webkit-transform: translate(-50%, -50%);
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            text-align: center;
-            gap: 0.3em;
-
-            a {
-                width: fit-content;
-            }
-        }
-    </style>
 {{/inline}}
 {{> base }}
