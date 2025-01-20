@@ -1,16 +1,11 @@
 use crate::models::ArticleStatus;
-use crate::util::typst::SystemWorld;
-use crate::{regex, DbConn};
+use crate::DbConn;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::form::{Form, FromForm};
 use rocket::response::Redirect;
 use rocket::{http::Status, serde::json::Json};
 use serde::Serialize;
-use std::path::PathBuf;
 use time::macros::format_description;
-use typst::diag::Severity;
-use typst::foundations::Smart;
-use typst_pdf::{PdfOptions, PdfStandard, PdfStandards};
 
 #[derive(FromForm)]
 pub struct BulletsForm<'a> {
@@ -18,10 +13,13 @@ pub struct BulletsForm<'a> {
     pub category: &'a str,
     #[field(validate = len(1..))]
     pub bullets: &'a str,
+    pub progress_current: Option<usize>,
+    pub progress_max: Option<usize>,
 }
 
-fn typst_escape(text: &str) -> String {
-    text.replace("#", "\\#")
+pub(crate) fn typst_escape(text: &str) -> String {
+    text.replace("\\", "\\\\")
+        .replace("#", "\\#")
         .replace("*", "\\*")
         .replace("_", "\\_")
         .replace("~", "\\~")
@@ -32,7 +30,6 @@ fn typst_escape(text: &str) -> String {
         .replace("$", "\\$")
         .replace("%", "\\%")
         .replace("^", "\\^")
-        .replace("\\", "\\\\")
         .replace("-?", "\\-?")
 }
 
@@ -40,8 +37,9 @@ fn typst_escape(text: &str) -> String {
 pub async fn bullets(conn: DbConn, bullets: Form<BulletsForm<'_>>) -> Result<Redirect, Status> {
     use crate::schema::articles::dsl;
     use crate::schema::print_articles::dsl as print_dsl;
+    use crate::util;
 
-    let category = typst_escape(bullets.category);
+    let category = typst_escape(&bullets.category);
     let category2 = category.clone();
     let category3 = category.clone();
     let text = typst_escape(bullets.bullets);
@@ -91,109 +89,19 @@ pub async fn bullets(conn: DbConn, bullets: Form<BulletsForm<'_>>) -> Result<Red
         return Ok(Redirect::to("/pdfcreate"));
     }
 
-    // Prepare the typst content
-    let mut content = include_str!("typst_template.typ")
-        .replace(
-            "{{ author }}",
-            &std::env::var("A5M_PDF_AUTHOR").unwrap_or("Default Author".to_string()),
-        )
-        .replace(
-            "{{ title }}",
-            &std::env::var("A5M_PDF_TITLE").unwrap_or("Aktuelle 5 Minuten".to_string()),
-        );
-
-    let bullets = conn
-        .run(move |c| {
-            print_dsl::print_articles
-                .select((print_dsl::category, print_dsl::bullets))
-                .filter(print_dsl::printed.eq(false))
-                .load::<(String, String)>(c)
-                .map_err(|_| Status::InternalServerError)
-        })
-        .await?;
-
-    info!("Found {} categories to print to the pdf", bullets.len());
-
-    for (category, bullets) in bullets {
-        content.push_str(&format!("\n\n= {}\n", category));
-        content.push_str(&bullets);
-    }
-
-    // Compile the document with typst
-    let world = SystemWorld::new(content);
-    let compile_result = typst::compile(&world);
-    let document = compile_result
-        .output
-        .expect("Failed to compile the typst document!");
-    for diagnostic in compile_result.warnings {
-        match diagnostic.severity {
-            Severity::Error => {
-                error!("{}", diagnostic.message);
-                for hint in &diagnostic.hints {
-                    error!("hint: {}", hint);
-                }
-                for point in &diagnostic.trace {
-                    error!("at {:?}:{}", point.span, point.v);
-                }
-            }
-            Severity::Warning => {
-                warn!("{}", diagnostic.message);
-                for hint in &diagnostic.hints {
-                    warn!("hint: {}", hint);
-                }
-            }
-        }
-    }
-
-    let now = time::OffsetDateTime::now_utc();
-    let options = PdfOptions {
-        ident: Smart::Auto,
-        timestamp: Some(
-            typst::foundations::Datetime::from_ymd_hms(
-                now.year(),
-                now.month().into(),
-                now.day(),
-                now.hour(),
-                now.minute(),
-                now.second(),
-            )
-            .unwrap(),
-        ),
-        page_ranges: None, // Export all pages
-        standards: PdfStandards::new(&[PdfStandard::A_2b]).unwrap(),
-    };
-
-    let pdf = match typst_pdf::pdf(&document, &options) {
-        Ok(p) => p,
-        Err(err) => {
-            error!("Could not render the typst pdf: {:?}", err);
-            return Err(Status::InternalServerError);
-        }
-    };
-    let pdf_directory =
-        PathBuf::from(std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string())).join("pdfs");
-    if !pdf_directory.as_path().exists() {
-        std::fs::create_dir_all(&pdf_directory)
-            .expect("Could not create pdf directory on the filesystem");
-    }
     let filename = format!(
         "{}.pdf",
-        now.format(format_description!(
-            "[year]-[month]-[day]T[hour]:[minute]:[second]"
-        ))
-        .unwrap()
+        time::OffsetDateTime::now_utc()
+            .format(format_description!(
+                "[year]-[month]-[day]T[hour]:[minute]:[second]"
+            ))
+            .map_err(|err| {
+                error!("Error formatting date: {}", err);
+                Status::InternalServerError
+            })?
     );
-    let path = pdf_directory.join(&filename);
-    std::fs::write(path, pdf).expect("Failed to write pdf");
+    util::typst::create_typst_pdf(conn, &filename).await?;
 
-    let affected = conn
-        .run(move |c| {
-            diesel::update(print_dsl::print_articles)
-                .set(print_dsl::printed.eq(true))
-                .execute(c)
-                .map_err(|_| Status::InternalServerError)
-        })
-        .await?;
     info!("{} articles have been marked as printed", affected);
 
     let pdf_uri = format!("/pdfs/{}", &filename);
@@ -223,76 +131,15 @@ pub async fn get_category_summary(
     conn: DbConn,
     category: String,
 ) -> Result<Json<CategoryResponse>, Status> {
-    use crate::schema::articles::dsl;
+    use crate::util::pdfcreation;
 
     let category_return = category.clone();
-    let contents: Vec<String> = conn
-        .run(move |c| {
-            dsl::articles
-                .select(dsl::content)
-                .filter(dsl::content.is_not_null())
-                .filter(dsl::category.eq(category))
-                .distinct()
-                .load::<Option<String>>(c)
-                .map_err(|_| Status::InternalServerError)
-        })
-        .await?
-        // We can safely unwrap here, as the filter in the query filters out non-null values.
-        .iter()
-        .map(|s| s.as_ref().unwrap().clone())
-        // Remove copyright notice (is not needed for the AI)
-        .map(|s| regex!(r#"Diese Nachricht wurde am \d{2}\.\d{2}\.\d{4} im Programm Deutschlandfunk gesendet\."#).replace_all(&s, "").to_string())
-        .collect();
+    let contents = pdfcreation::get_category_contents(&conn, category).await?;
 
     Ok(Json(CategoryResponse {
         category: category_return,
         count: contents.len(),
-        text: contents.join("\n"),
+        //text: contents.join("\n"),
+        text: String::new(),
     }))
-}
-
-#[cfg(test)]
-mod test {
-    use crate::util::typst::SystemWorld;
-    use typst::diag::Severity;
-    use typst::foundations::Smart;
-
-    #[test]
-    fn typst_compile() {
-        let content = include_str!("typst_template.typ")
-            .replace("{{ author }}", "Test")
-            .replace("{{ title }}", "Test");
-
-        let world = SystemWorld::new(content);
-        let mut tracer = typst::eval::Tracer::default();
-        let document = match typst::compile(&world, &mut tracer) {
-            Ok(d) => d,
-            Err(e) => {
-                error!("Failed to compile typst document");
-                for diagnostic in tracer.warnings().iter().chain(e.iter()) {
-                    match diagnostic.severity {
-                        Severity::Error => {
-                            error!("{}", diagnostic.message);
-                            for hint in &diagnostic.hints {
-                                error!("hint: {}", hint);
-                            }
-                            for point in &diagnostic.trace {
-                                error!("at {:?}:{}", point.span, point.v);
-                            }
-                        }
-                        Severity::Warning => {
-                            warn!("{}", diagnostic.message);
-                            for hint in &diagnostic.hints {
-                                warn!("hint: {}", hint);
-                            }
-                        }
-                    }
-                }
-                panic!("Failed to compile typst document");
-            }
-        };
-
-        let pdf = typst_pdf::pdf(&document, Smart::Auto, None);
-        std::fs::write("output.pdf", pdf).expect("Failed to write pdf");
-    }
 }

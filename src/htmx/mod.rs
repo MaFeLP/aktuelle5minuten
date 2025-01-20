@@ -2,6 +2,7 @@ use crate::{api, DbConn};
 use rocket::http::Status;
 use rocket::response::Redirect;
 
+pub mod pdfcreate;
 pub mod tinder;
 
 #[get("/actions/load/dlf")]

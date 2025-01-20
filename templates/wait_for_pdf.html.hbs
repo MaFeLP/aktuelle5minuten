@@ -1,0 +1,15 @@
+<div class="alert alert-info">
+  <h3 class="alert-heading">
+    PDF wird erstellt...
+  </h3>
+
+  <hr />
+
+  <div>
+    <p class="mb-0">Bitte warten Sie einen Moment, bis das PDF erstellt wurde. Dies kann einige Sekunden dauern.</p>
+
+    <div hx-get="/htmx/compile_running?redirect_uri={{redirect_uri}}" hx-trigger="every 1s">
+
+    </div>
+  </div>
+</div>

@@ -1,3 +1,5 @@
+use crate::{DbConn, ServerError};
+use std::io::Write;
 use std::path::PathBuf;
 use typst::diag::FileResult;
 use typst::foundations::{Bytes, Datetime};
@@ -102,5 +104,158 @@ impl typst::World for SystemWorld {
         let offset = time::UtcOffset::from_hms(offset.try_into().ok()?, 0, 0).ok()?;
         let time = self.time.checked_to_offset(offset)?;
         Some(Datetime::Date(time.date()))
+    }
+}
+
+pub async fn create_typst_pdf(conn: DbConn, filename: &str) -> Result<Vec<u8>, ServerError> {
+    use crate::schema::print_articles::dsl as print_dsl;
+    use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+    use typst::diag::Severity;
+    use typst::foundations::Smart;
+    use typst_pdf::{PdfOptions, PdfStandard, PdfStandards};
+
+    //let content = Template::show("pdf", context! {}).ok_or(ServerError::TemplateError)?;
+
+    // Prepare the typst content
+    let mut content = include_str!("typst_template.typ")
+        .replace(
+            "{{ author }}",
+            &std::env::var("A5M_PDF_AUTHOR").unwrap_or("Default Author".to_string()),
+        )
+        .replace(
+            "{{ title }}",
+            &std::env::var("A5M_PDF_TITLE").unwrap_or("Aktuelle 5 Minuten".to_string()),
+        );
+
+    let bullets = conn
+        .run(move |c| {
+            print_dsl::print_articles
+                .select((print_dsl::category, print_dsl::bullets))
+                .filter(print_dsl::printed.eq(false))
+                .load::<(String, String)>(c)
+        })
+        .await?;
+
+    info!("Found {} categories to print to the pdf", bullets.len());
+
+    for (category, bullets) in bullets {
+        content.push_str(&format!("\n\n= {}\n", category));
+        content.push_str(&bullets);
+    }
+
+    if std::path::Path::new("/tmp/typst_builder.typ").exists() {
+        std::fs::remove_file("/tmp/typst_builder.typ").unwrap();
+    }
+    let mut file = std::fs::File::create("/tmp/typst_builder.typ").unwrap();
+    file.write_all(content.as_bytes()).unwrap();
+
+    // Compile the document with typst
+    let world = SystemWorld::new(content);
+    let compile_result = typst::compile(&world);
+    let document = compile_result.output?;
+    for diagnostic in compile_result.warnings {
+        match diagnostic.severity {
+            Severity::Error => {
+                error!("{}", diagnostic.message);
+                for hint in &diagnostic.hints {
+                    error!("hint: {}", hint);
+                }
+                for point in &diagnostic.trace {
+                    error!("at {:?}:{}", point.span, point.v);
+                }
+            }
+            Severity::Warning => {
+                warn!("{}", diagnostic.message);
+                for hint in &diagnostic.hints {
+                    warn!("hint: {}", hint);
+                }
+            }
+        }
+    }
+
+    let now = time::OffsetDateTime::now_utc();
+    let options = PdfOptions {
+        ident: Smart::Auto,
+        timestamp: Some(
+            typst::foundations::Datetime::from_ymd_hms(
+                now.year(),
+                now.month().into(),
+                now.day(),
+                now.hour(),
+                now.minute(),
+                now.second(),
+            )
+            .unwrap(),
+        ),
+        page_ranges: None, // Export all pages
+        standards: PdfStandards::new(&[PdfStandard::A_2b]).unwrap(),
+    };
+
+    let pdf = typst_pdf::pdf(&document, &options)?;
+    let pdf_directory =
+        PathBuf::from(std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string())).join("pdfs");
+    if !pdf_directory.as_path().exists() {
+        std::fs::create_dir_all(&pdf_directory)
+            .expect("Could not create pdf directory on the filesystem");
+    }
+    let path = pdf_directory.join(filename);
+    std::fs::write(path, &pdf)?;
+
+    let affected = conn
+        .run(move |c| {
+            diesel::update(print_dsl::print_articles)
+                .set(print_dsl::printed.eq(true))
+                .execute(c)
+        })
+        .await?;
+    info!("{} articles have been marked as printed", affected);
+    Ok(pdf)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use typst::diag::{Severity, SourceDiagnostic};
+
+    #[test]
+    fn typst_compile() -> Result<(), ecow::EcoVec<SourceDiagnostic>> {
+        let content = include_str!("typst_template.typ")
+            .replace("{{ author }}", "Test")
+            .replace("{{ title }}", "Test");
+
+        let world = SystemWorld::new(content);
+        let compile_result = typst::compile(&world);
+        let document = compile_result.output?;
+        for diagnostic in compile_result.warnings {
+            match diagnostic.severity {
+                Severity::Error => {
+                    error!("{}", diagnostic.message);
+                    for hint in &diagnostic.hints {
+                        error!("hint: {}", hint);
+                    }
+                    for point in &diagnostic.trace {
+                        error!("at {:?}:{}", point.span, point.v);
+                    }
+                }
+                Severity::Warning => {
+                    warn!("{}", diagnostic.message);
+                    for hint in &diagnostic.hints {
+                        warn!("hint: {}", hint);
+                    }
+                }
+            }
+        }
+
+        let options = typst_pdf::PdfOptions {
+            ident: typst::foundations::Smart::Auto,
+            timestamp: None,
+            page_ranges: None, // Export all pages
+            standards: typst_pdf::PdfStandards::new(&[typst_pdf::PdfStandard::A_2b]).unwrap(),
+        };
+
+        let pdf = typst_pdf::pdf(&document, &options)?;
+        std::fs::write("output.pdf", pdf).expect("Failed to write pdf");
+
+        Ok(())
     }
 }

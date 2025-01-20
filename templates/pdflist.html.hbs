@@ -19,6 +19,20 @@
     </a>
 
     <main style="margin-top: 75px;">
+        {{#if no_categories}}
+          <div class="alert alert-info">
+            <h3 class="alert-heading">
+              Keine Kategorien vorhanden
+            </h3>
+            <hr />
+            <div>
+              <p class="mb-0">
+                Es wurden noch keine Artikel kategorisiert. Entweder Artikel <a href="/dates">über das Tinder</a> kategorisieren oder ein bereits erstelltes PDF aus der untenstehenden Liste auswählen!
+              </p>
+            </div>
+          </div>
+        {{/if}}
+
         <h4>Aktuelle 5 Minuten &mdash; Generierte PDF-Dateien</h4>
         <div id="fileList" class="btn-group-vertical">
             {{#each files}}

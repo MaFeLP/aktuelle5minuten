@@ -31,6 +31,7 @@ use rocket_dyn_templates::handlebars::{
 use rocket_dyn_templates::Template;
 use rocket_sync_db_pools::database;
 use std::path::{Path, PathBuf};
+use typst::diag::{Severity, SourceDiagnostic};
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
@@ -42,8 +43,33 @@ pub(crate) enum ServerError {
     DateFormat(#[from] time::error::Format),
     #[error("Date parse error: {0}")]
     DateParse(#[from] time::error::Parse),
-    #[error("No articles found!")]
-    NotFound,
+    #[error("Typst compilation error: {0}")]
+    TypstError(String),
+    #[error("IO Error: {0}")]
+    IoError(#[from] std::io::Error),
+}
+
+impl From<ecow::EcoVec<SourceDiagnostic>> for ServerError {
+    fn from(err: ecow::EcoVec<SourceDiagnostic>) -> Self {
+        let mut out = String::new();
+
+        for diag in err {
+            out.push_str(&format!(
+                "Typst compilation error:\
+                {}: {}\n\nhints:\n",
+                match diag.severity {
+                    Severity::Error => "Error",
+                    Severity::Warning => "Warning",
+                },
+                diag.message,
+            ));
+            for hint in diag.hints {
+                out.push_str(&format!("  - {}\n", hint));
+            }
+        }
+
+        ServerError::TypstError(out)
+    }
 }
 
 impl From<ServerError> for Status {
@@ -179,6 +205,8 @@ fn rocket() -> _ {
                 htmx::load_new_dlf_articles,
                 htmx::tinder::promote_article,
                 htmx::tinder::demote_article,
+                htmx::pdfcreate::compile_running,
+                htmx::pdfcreate::next_category,
             ],
         )
 }

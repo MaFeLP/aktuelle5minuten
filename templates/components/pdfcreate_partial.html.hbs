@@ -1,0 +1,23 @@
+<main>
+  <section class="content">
+    <div
+      class="progress"
+      role="progressbar"
+      aria-label="PDF creation Progress"
+      aria-valuenow="{{progress_current}}"
+      aria-valuemin="0"
+      aria-valuemax="{{progress_max}}"
+    >
+      <div
+        class="progress-bar overflow-visible text-dark bg-info"
+        style="width: {{progress_percentage}}%;"
+      >
+        {{progress_current}}/{{progress_max}}
+      </div>
+    </div>
+
+    <div id="pdfcreate-container" class="card">
+      {{> components/create_card }}
+    </div>
+  </section>
+</main>

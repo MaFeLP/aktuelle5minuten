@@ -21,6 +21,7 @@ typst = "0.12"
 typst-pdf = "0.12"
 ttf-parser = "0.25"
 thiserror = "2.0"
+ecow = "0.2"
 
 [dev-dependencies]
-tokio = "1.41"
+tokio = "1.43"

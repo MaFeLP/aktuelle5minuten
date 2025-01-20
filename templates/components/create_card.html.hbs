@@ -1,0 +1,125 @@
+<script>
+  function copy() {
+    let prompt = document.querySelector("textarea#prompt").value;
+    let content = document.querySelector("textarea#texts").value;
+
+    let toClipboard = `${prompt}\n${content}`.split('\n').map((line) => {return line.trim()}).join('\n').replace('\n\n', '\n');
+
+    navigator.clipboard
+      .writeText(toClipboard)
+      .then(() => {
+        console.info("Copied bullet points and prompt to clipboard");
+      })
+      .catch((err) => {
+        console.error("Bullets could not be copied!", err);
+      });
+  }
+
+  function paste() {
+    navigator.clipboard
+      .readText()
+      .then((text) => {
+          document.querySelector("textarea#bullets-text").value = text;
+          document.querySelector("i#paste-btn-icon").setAttribute("class", "bi bi-clipboard-check");
+      })
+      .catch((err) => {
+        console.error("Could not paste bullets!", err);
+      });
+  }
+</script>
+
+<h5 class="card-header">{{title}}</h5>
+<div class="card-body">
+  <details class="card-text form-element">
+    <summary>Text Anzeigen</summary>
+    <label class="form-label visually-hidden" for="prompt">Prompt für KI-Anwendungen</label>
+    <textarea id="prompt" readonly rows="2" hidden>
+    {{prompt}}
+    </textarea>
+    <label for="texts" class="form-label visually-hidden">Zusammengesammelte Texte</label>
+    <textarea class="form-control form-element" id="texts" readonly rows="20">
+{{#each articles}}
+# {{title}}
+{{content}}
+
+{{/each}}
+    </textarea>
+  </details>
+
+  <div class="d-flex col">
+    <button id="copy-btn" class="btn btn-outline-success" onclick="copy()" style="margin-right: auto;">
+      Texte kopieren
+      <i class="bi bi-clipboard"></i>
+    </button>
+    <div style="margin-right: 0;">
+      {{#if chatgpt_enabled}}
+        <a
+          id="chatgpt-btn"
+          class="btn btn-outline-success"
+          href="https://chat.openai.com/"
+          target="_blank"
+          title="Zu ChatGPT"
+        >
+          <img
+            id="chatgpt-logo"
+            src="/assets/img/icon-chatgpt.svg"
+            width="30px"
+            height="30px"
+            alt="ChatGPT Logo"
+          />
+        </a>
+      {{/if}}
+      {{#if claude_enabled}}
+        <a
+          id="claude-btn"
+          class="btn btn-outline-success"
+          href="https://claude.ai/chats/"
+          target="_blank"
+          title="Zu Claude"
+        >
+          <img
+            id="claude-logo"
+            src="/assets/img/claude_app_icon.png"
+            width="338"
+            height="338"
+            style="height: 30px; width: auto;"
+            alt="Claude Logo"
+          />
+        </a>
+      {{/if}}
+    </div>
+  </div>
+
+  <hr />
+
+  <form hx-post="/htmx/bullets/next_category" hx-target="main" hx-swap="outerHTML">
+    <label>
+      <input type="text" name="category" value="{{title}}" hidden/>
+    </label>
+    <label>
+      <input type="number" name="progress_current" value="{{progress_current}}" hidden/>
+    </label>
+    <label>
+      <input type="number" name="progress_max" value="{{progress_max}}" hidden/>
+    </label>
+
+    <div class="form-element">
+      <label for="bullets-text" class="form-label">Stichpunkte hier eingeben</label>
+      <textarea class="form-control" id="bullets-text" rows="20" name="bullets"></textarea>
+    </div>
+    <div class="d-flex col" style="margin-right: auto;">
+      <button
+        id="paste-btn"
+        class="btn btn-outline-secondary"
+        type="button"
+        onclick="paste()"
+      >
+        Einfügen
+        <i id="paste-btn-icon" class="bi bi-clipboard-plus"></i>
+      </button>
+      <button id="submit-btn" class="btn btn-outline-success" style="margin-right: 0;" type="submit">
+        Absenden <i class="bi bi-check2"></i>
+      </button>
+    </div>
+  </form>
+</div>

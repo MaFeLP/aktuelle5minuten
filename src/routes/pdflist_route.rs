@@ -2,8 +2,8 @@ use rocket::http::Status;
 use rocket_dyn_templates::{context, Template};
 use std::path::PathBuf;
 
-#[get("/pdflist")]
-pub(crate) async fn pdflist() -> Result<Template, Status> {
+#[get("/pdflist?<no_categories>")]
+pub(crate) async fn pdflist(no_categories: Option<bool>) -> Result<Template, Status> {
     let pdfs: Vec<String> = std::fs::read_dir(
         PathBuf::from(std::env::var("A5M_DATA_PATH").unwrap_or("/data".to_string())).join("pdfs"),
     )
@@ -21,6 +21,7 @@ pub(crate) async fn pdflist() -> Result<Template, Status> {
         "pdflist",
         context! {
             files: pdfs,
+            no_categories: no_categories.unwrap_or(false),
         },
     ))
 }
