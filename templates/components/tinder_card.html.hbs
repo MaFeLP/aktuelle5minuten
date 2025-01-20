@@ -1,7 +1,6 @@
 <div id="tinder-card" class="card">
     <img
         class="card-img-top"
-        loading="lazy"
         src="{{figure_src}}"
         alt="{{figure_alt}}"
         srcset="{{figure_srcset}}"
@@ -34,14 +33,17 @@
             <button
                 class="select-btn col btn btn-outline-success"
                 onclick="openPromoteDialog()"
+                title="Artikel promoten &mdash; Shortcut: Pfeil links"
             >
                 <i class="bi bi-check2"></i>
             </button>
             <button
+              id="tinder-demote-submit-button"
                 class="select-btn col btn btn-outline-danger"
-                hx-delete="/htmx/tinder?key={{article_key}}&date={{date}}"
-                hx-target="div#tinder-container"
-                onclick="updateProgressBar()"
+                hx-delete="/htmx/tinder?key={{article_key}}&date={{date}}&current_articles={{progress_current}}&max_articles={{progress_max}}"
+                hx-target="main"
+                hx-swap="outerHTML"
+                title="Artikel demoten &mdash; Shortcut: Pfeil rechts"
             >
                 <i class="bi bi-x-lg"></i>
             </button>

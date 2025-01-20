@@ -1,5 +1,5 @@
 <dialog id="promote-dialog">
-    <form hx-post="/htmx/tinder" hx-target="div#tinder-container" method="dialog">
+  <form hx-post="/htmx/tinder" hx-target="main" hx-swap="outerHTML" method="dialog">
         <div class="modal-header">
             <h5 class="modal-title">Post aufnehmen!</h5>
         </div>
@@ -33,6 +33,14 @@
       <label>
         <input type="text" name="key" value="{{article_key}}" hidden/>
       </label>
+
+    <label>
+      <input type="text" name="current_articles" value="{{progress_current}}" hidden />
+    </label>
+
+    <label>
+      <input type="text" name="max_articles" value="{{progress_max}}" hidden />
+    </label>
 
       <div class="modal-footer">
             <button id="dialog-submit-btn" class="btn btn-success" type="submit">Abschicken</button>

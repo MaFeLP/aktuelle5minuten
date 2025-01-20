@@ -153,38 +153,6 @@ async fn download_and_parse_dlf_article(
     Ok(article)
 }
 
-pub(crate) async fn count_articles(
-    conn: &DbConn,
-    date: Option<String>,
-) -> Result<i64, ServerError> {
-    use crate::schema::articles::dsl;
-
-    match date {
-        Some(article_date) => {
-            let article_date = Date::parse(&article_date, &DATE_FORMAT)?;
-            let count = conn
-                .run(move |c| {
-                    dsl::articles
-                        .select(diesel::dsl::count_star())
-                        .filter(diesel::dsl::date(dsl::date).eq(article_date))
-                        .first::<i64>(c)
-                })
-                .await?;
-            Ok(count)
-        }
-        None => {
-            let count = conn
-                .run(|c| {
-                    dsl::articles
-                        .select(diesel::dsl::count_star())
-                        .first::<i64>(c)
-                })
-                .await?;
-            Ok(count)
-        }
-    }
-}
-
 pub(crate) async fn get_categories(conn: &DbConn, print: bool) -> Result<Vec<String>, ServerError> {
     use crate::schema::articles::dsl;
 

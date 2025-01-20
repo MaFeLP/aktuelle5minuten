@@ -55,70 +55,23 @@
 {{/inline}}
 
 {{#*inline "content" }}
-  <main>
-    <section class="content">
-      {{#if has_articles}}
-        <div
-          class="progress"
-          role="progressbar"
-          aria-label="Tinder Progress"
-          aria-valuenow="1"
-          aria-valuemin="0"
-          aria-valuemax="{{max_articles}}"
-        >
-          <div
-            class="progress-bar overflow-visible text-dark bg-info"
-            style="width: {{initial_percentage}}%;"
-          >
-            1/{{max_articles}}
-          </div>
-        </div>
-
-        <div id="tinder-container">
-          {{> components/tinder_card }}
-
-          {{> components/promote_dialog }}
-        </div>
-
-      {{else}}
-        <div class="alert alert-success">
-          <h3 class="alert-heading">
-            Keine Artikel zum Tindern in der Datenbank!
-          </h3>
-          <hr />
-          <div>
-            <a class="btn btn-outline-primary" id="home-button" href="/">
-              Zurück zur Startseite
-              <i class="bi bi-house-fill"></i>
-            </a>
-            <a class="btn btn-outline-primary" id="home-button" href="/dates">
-              Zur Datumsauswahl
-              <i class="bi bi-calendar3"></i>
-            </a>
-          </div>
-        </div>
-      {{/if}}
-    </section>
-  </main>
+  {{> components/tinder_partial }}
 
   <script>
-    let progressBarCounter = 0;
-    let progressContainer = document.querySelector('div.progress');
-    let progressBar = document.querySelector('div.progress-bar');
-    function updateProgressBar() {
-      progressBarCounter++;
-      progressContainer.setAttribute('aria-valuenow', progressBarCounter);
-      progressBar.innerText = `${progressBarCounter}/{{max_articles}}`;
-      let width = Math.round(progressBarCounter/{{max_articles}} * 100);
-      progressBar.style['width'] = width + "%";
-    }
-
     function openPromoteDialog() {
       document.getElementById("promote-dialog").showModal();
     }
     function closePromoteDialog() {
       document.getElementById("promote-dialog").close();
     }
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        document.getElementById("promote-dialog").showModal();
+      } else if (event.key === "ArrowRight") {
+        document.querySelector("button#tinder-demote-submit-button").click();
+      }
+    });
   </script>
 {{/inline}}
 {{> base htmx=true}}

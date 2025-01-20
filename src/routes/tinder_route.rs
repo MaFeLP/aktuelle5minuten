@@ -1,4 +1,5 @@
-use crate::util::tinder::{cache_next_article, count_articles, get_categories, get_first_article};
+use crate::util::count_articles;
+use crate::util::tinder::{cache_next_article, get_categories, get_first_article};
 use crate::DbConn;
 use rocket::http::Status;
 use rocket_dyn_templates::{context, Template};
@@ -30,14 +31,16 @@ pub(crate) async fn tinder(conn: DbConn, date: Option<String>) -> Result<Templat
         context! {
             categories: categories,
             date: date.unwrap_or_default(),
-            initial_percentage: rounded,
-            max_articles: number_of_articles,
             release_date_time: &article.date.format(format_description!("[day].[month].[year] um [hour]:[minute] Uhr")).map_err(|err| {
                 error!("Error formatting date: {}", err);
                 Status::InternalServerError
             })?.to_string(),
 
             has_articles: number_of_articles > 0,
+
+            progress_current: 1,
+            progress_max: number_of_articles,
+            progress_percentage: rounded,
 
             // Render the article page
             figure_src: &article.figure_src,

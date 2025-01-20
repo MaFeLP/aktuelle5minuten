@@ -1,0 +1,45 @@
+<main>
+  <section class="content">
+    {{#if has_articles}}
+      <div
+        class="progress"
+        role="progressbar"
+        aria-label="Tinder Progress"
+        aria-valuenow="{{progress_current}}"
+        aria-valuemin="0"
+        aria-valuemax="{{progress_max}}"
+      >
+        <div
+          class="progress-bar overflow-visible text-dark bg-info"
+          style="width: {{progress_percentage}}%;"
+        >
+          {{progress_current}}/{{progress_max}}
+        </div>
+      </div>
+
+      <div id="tinder-container">
+        {{> components/tinder_card }}
+
+        {{> components/promote_dialog }}
+      </div>
+
+    {{else}}
+      <div class="alert alert-success">
+        <h3 class="alert-heading">
+          Keine Artikel zum Tindern in der Datenbank!
+        </h3>
+        <hr />
+        <div>
+          <a class="btn btn-outline-primary" id="home-button" href="/">
+            Zurück zur Startseite
+            <i class="bi bi-house-fill"></i>
+          </a>
+          <a class="btn btn-outline-primary" id="home-button" href="/dates">
+            Zur Datumsauswahl
+            <i class="bi bi-calendar3"></i>
+          </a>
+        </div>
+      </div>
+    {{/if}}
+  </section>
+</main>
