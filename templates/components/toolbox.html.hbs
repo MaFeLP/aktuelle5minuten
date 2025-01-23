@@ -1,0 +1,129 @@
+<div id="toolbox" class="dropdown">
+    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-tools"></i>
+    </button>
+
+    <dialog id="toolbox-content">
+        <ul id="dropdown-menu">
+            <li>
+                <button class="dropdown-item" onclick="demoteNextArticle()">
+                    <i class="bi bi-caret-down-fill"></i> Nächsten Artikel ablehnen
+                </button>
+            </li>
+            <li>
+                <button class="dropdown-item" onclick="deleteNextArticle()">
+                    <i class="bi bi-trash2"></i> Nächsten Artikel löschen
+                </button>
+            </li>
+            <li>
+                <button class="dropdown-item" onclick="deleteOldArticles()">
+                    <i class="bi bi-trash"></i> Artikel älter als 1mo löschen
+                </button>
+            </li>
+        </ul>
+    </dialog>
+
+    <script>
+        window.onload = () => {
+            const toolboxDialog = document.getElementById("toolbox-content");
+            const toolboxButton = document.getElementById("toolbox");
+            let toolboxHoverTimer;
+            let toolboxOpen = false;
+            toolboxButton.addEventListener('click', (event) => {
+                if (toolboxOpen) return;
+                toolboxDialog.showModal();
+                toolboxOpen = true;
+            });
+            toolboxDialog.addEventListener('click', (event) => {
+                if (!toolboxOpen) return;
+                console.debug("toolboxDialog click", event);
+                toolboxOpen = false;
+                toolboxDialog.close();
+                clearTimeout(toolboxHoverTimer);
+            });
+            toolboxButton.addEventListener('mouseenter', (event) => {
+                console.debug("toolboxButton mouseenter", event);
+                toolboxHoverTimer = setTimeout(() => {
+                    if (toolboxOpen) return;
+                    toolboxOpen = true;
+                    toolboxDialog.showModal();
+                }, 250);
+            });
+            toolboxButton.addEventListener('mouseleave', (event) => {
+                console.debug("toolboxButton mouseleave", event);
+                toolboxOpen = false;
+                clearTimeout(toolboxHoverTimer);
+            });
+            document.getElementById('dropdown-menu').addEventListener('mouseleave', (event) => {
+                console.debug("dropdown-menu mouseleave", event);
+                setTimeout(() => {
+                    if (!toolboxOpen) return;
+                    toolboxOpen = false;
+                    toolboxDialog.close();
+                }, 250);
+            });
+        }
+
+        function deleteOldArticles() {
+            if (
+                window.confirm("Artikel älter als einen Monat unwiderruflich löschen?")
+            ) {
+                fetch("/api/actions/clean")
+                    .then(() => {
+                        console.info("Cleaned old articles");
+                        window.alert("Artikel älter als einen Monat wurden gelöscht!");
+                    })
+                    .catch((err) => {
+                        window.alert("Fehler! Neue Artikel konnten nicht importiert werden!");
+                        console.error("Could not load new articles into the database!", err);
+                    });
+            }
+        }
+
+        function demoteNextArticle() {
+            let date = window.prompt("Von welchem Tag soll der nächste Artikel abgelehnt werden? (leer lassen für generelle Artikel; Format: YYYY-MM-DD)");
+            if (date === null) return;
+            let url = "/api/actions/demote_next";
+            if (date) {
+                if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    window.alert("Ungültiges Datumsformat! (Format: YYYY-MM-DD)");
+                    return;
+                }
+                url += "?date=" + date;
+            }
+            fetch (url)
+                .then(() => {
+                    console.info("Demoted next article");
+                    window.alert(`Nächster Artikel vom ${date} wurde abgelehnt!`);
+                    window.location.reload();
+                })
+                .catch((err) => {
+                    window.alert("Fehler! Nächster Artikel konnte nicht abgelehnt werden!");
+                    console.error("Could not demote next article!", err);
+                });
+        }
+
+        function deleteNextArticle() {
+            let date = window.prompt("Von welchem Tag soll der nächste Artikel abgelehnt werden? (leer lassen für generelle Artikel; Format: YYYY-MM-DD)");
+            if (date === null) return;
+            let url = "/api/actions/delete_next";
+            if (date) {
+                if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    window.alert("Ungültiges Datumsformat! (Format: YYYY-MM-DD)");
+                    return;
+                }
+                url += "?date=" + date;
+            }
+            fetch (url)
+                .then(() => {
+                    console.info("Demoted next article");
+                    window.alert(`Nächster Artikel vom ${date} wurde abgelehnt!`);
+                    window.location.reload();
+                })
+                .catch((err) => {
+                    window.alert("Fehler! Nächster Artikel konnte nicht abgelehnt werden!");
+                    console.error("Could not demote next article!", err);
+                });
+        }
+    </script>
+</div>
