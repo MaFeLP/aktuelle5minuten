@@ -219,3 +219,12 @@ div#toolbox {
     }
   }
 }
+
+a#home-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: auto;
+  bottom: auto;
+  margin: 1em;
+}
