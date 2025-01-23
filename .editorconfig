@@ -14,3 +14,6 @@ curly_bracket_next_line = false
 [*.css]
 indent_size = 2
 tab_width = 2
+
+[*.html.hbs]
+max_line_length = 0

@@ -189,6 +189,8 @@ fn rocket() -> _ {
             routes![
                 api::actions::load_new_articles,
                 api::actions::clean_articles,
+                api::actions::delete_next,
+                api::actions::demote_next,
             ],
         )
         .mount(

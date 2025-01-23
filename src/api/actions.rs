@@ -1,9 +1,11 @@
-use crate::models::ArticleStatus;
+use crate::models::{ArticleStatus, DATE_FORMAT};
 use crate::scrapers::dlf;
-use crate::DbConn;
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use crate::{DbConn, ServerError};
+use diesel::result::Error;
+use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
 use std::ops::Sub;
+use time::Date;
 
 #[get("/clean")]
 pub async fn clean_articles(conn: DbConn) -> Result<Status, Status> {
@@ -81,4 +83,75 @@ pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
         }
     }
     Ok(Status::Created)
+}
+
+#[get("/delete_next?<date>")]
+pub async fn delete_next(conn: DbConn, date: Option<String>) -> Result<Status, Status> {
+    use crate::schema::articles::dsl;
+
+    let delete_key = get_next_article_key(&conn, date).await?;
+
+    if let Some(key) = delete_key {
+        conn.run(move |c| diesel::delete(dsl::articles.filter(dsl::key.eq(key))).execute(c))
+            .await
+            .map_err(|err| {
+                error!("Could not find article to delete: {}", err);
+                Status::InternalServerError
+            })?;
+    }
+
+    Ok(Status::Created)
+}
+
+#[get("/demote_next?<date>")]
+pub async fn demote_next(conn: DbConn, date: Option<String>) -> Result<Status, Status> {
+    use crate::schema::articles::dsl;
+
+    let demote_key = get_next_article_key(&conn, date).await?;
+
+    if let Some(key) = demote_key {
+        conn.run(move |c| {
+            diesel::update(dsl::articles.find(&key))
+                .set(dsl::status.eq(i32::from(ArticleStatus::Demoted)))
+                .execute(c)
+                .map_err(|_| Status::InternalServerError)
+        })
+        .await?;
+    }
+
+    Ok(Status::Created)
+}
+
+async fn get_next_article_key(
+    conn: &DbConn,
+    date: Option<String>,
+) -> Result<Option<String>, ServerError> {
+    use crate::schema::articles::dsl;
+
+    Ok(match date {
+        Some(date) => {
+            let article_date = Date::parse(&date, &DATE_FORMAT).unwrap();
+            conn.run(move |c| {
+                dsl::articles
+                    .filter(diesel::dsl::date(dsl::date).eq(article_date))
+                    .filter(dsl::status.eq(i32::from(ArticleStatus::Uncategorized)))
+                    .filter(dsl::content.is_null())
+                    .select(dsl::key)
+                    .first::<String>(c)
+                    .optional()
+            })
+            .await?
+        }
+        None => {
+            conn.run(move |c| {
+                dsl::articles
+                    .filter(dsl::status.eq(i32::from(ArticleStatus::Uncategorized)))
+                    .filter(dsl::content.is_null())
+                    .select(dsl::key)
+                    .first::<String>(c)
+                    .optional()
+            })
+            .await?
+        }
+    })
 }
