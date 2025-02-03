@@ -8,7 +8,7 @@ COPY frontend/ ./
 RUN pnpm build
 
 # Create the rust backend
-FROM rust:1.82-slim-bookworm AS backend
+FROM rust:1.84-slim-bookworm AS backend
 RUN apt-get update && apt-get install -y \
     libsqlite3-dev libssl-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
