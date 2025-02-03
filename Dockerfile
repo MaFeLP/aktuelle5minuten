@@ -5,12 +5,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /build
 COPY . ./
-RUN --mount=type=cache,target=/build/target \
-    --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/usr/local/cargo/git \
-    set -eux && \
-    cargo build --release && \
-    objcopy --compress-debug-sections target/release/aktuelle5minuten ./main
+#RUN --mount=type=cache,target=/build/target \
+#    --mount=type=cache,target=/usr/local/cargo/registry \
+#    --mount=type=cache,target=/usr/local/cargo/git \
+#    set -eux && \
+#    cargo build --release && \
+#    objcopy --compress-debug-sections target/release/aktuelle5minuten ./main
+RUN cargo build --release && objcopy --compress-debug-sections target/release/aktuelle5minuten ./main
 
 FROM debian:bookworm-slim
 WORKDIR /app
