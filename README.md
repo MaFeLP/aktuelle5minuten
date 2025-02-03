@@ -29,28 +29,22 @@ You can also an `.env` file with the `--env-file aktuelle5minuten.env` command f
 
 
 ## Build
-> [!NOTE]
-> You need to change the server URL for your API to match your environment.
-> To set up your environment for development, run the following command. For production,
-> replace `http://localhost:5000` with your own domain name/IP.
+Building the service is as easy as can be: Install rust and it's tooling, and then run the following
+command:
 
-```shell
-sed -E -i 's|export const BASE_PATH.*$|export const BASE_PATH = "http://localhost:5000";|g' src/api-client/runtime.ts
+```bash
+cargo run
+```
+
+You can also build a production version using:
+
+```bash
+cargo build --release
+```
+
+There is also a docker image available that bundles everything into a small package:
+
+```bash
 docker build -t aktuelle5minuten .
 ```
 
-## Development
-> [!NOTE]
-> Needs [Python Poetry](https://python-poetry.org/) and [pnpm](https://pnpm.io/) installed.
-
-### Start the backend service
-```shell
-poetry install
-poetry run flask run
-```
-
-### Start the frontend dev server
-```shell
-pnpm install
-pnpm run dev
-```
