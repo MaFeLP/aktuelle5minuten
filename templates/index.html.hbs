@@ -54,7 +54,7 @@
     <hr />
 
     <div id="form-container" class="modal-body">
-      <form method="get" action="/htmx/actions/load/dlf">
+      <form method="get" action="/htmx/actions/load/dlf" onsubmit="showLoadingIndicator('img#deutschlandfunk-logo')">
         <div>
           <label for="startDate" class="form-label">Von</label>
           <input  id="startDate" class="form-control" type="date" readonly value="{{ start_date }}" aria-valuemax="{{ end_date }}"/>
@@ -67,6 +67,7 @@
               alt="Deutschlandfunk Logo"
               width="278"
               height="48"
+              id="deutschlandfunk-logo"
           />
         </button>
       </form>
@@ -74,7 +75,7 @@
       <div class="vertline"></div>
       <hr />
 
-      <form method="get" action="/htmx/actions/load/tagesschau">
+      <form method="get" action="/htmx/actions/load/tagesschau" onsubmit="showLoadingIndicator('img#tagesschau-logo')">
         <div>
           <label for="startDate" class="form-label">Von</label>
           <input  id="startDate" class="form-control" type="date" value="{{ start_date }}" aria-valuemax="{{ end_date }}"/>
@@ -88,6 +89,7 @@
                   alt="Tagesschau Logo"
                   width="174"
                   height="57"
+                  id="tagesschau-logo"
               />
           </button>
        </form>
@@ -120,6 +122,11 @@
                       console.error("Could not load new articles into the database!", err);
                   });
           }
+      }
+
+      function showLoadingIndicator(logoId) {
+          let logo = document.querySelector(logoId);
+          logo.outerHTML = `<span id="deutschlandfunk-indicator" class="spinner-border hidden" role="status"><span class="visually-hidden">Loading...</span></span>`;
       }
   </script>
 {{/inline}}

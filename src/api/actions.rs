@@ -1,7 +1,6 @@
 use crate::models::{ArticleStatus, DATE_FORMAT};
 use crate::scrapers::dlf;
 use crate::{DbConn, ServerError};
-use diesel::result::Error;
 use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
 use std::ops::Sub;

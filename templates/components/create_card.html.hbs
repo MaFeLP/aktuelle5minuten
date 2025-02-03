@@ -1,9 +1,11 @@
+{{#raw }}
 <script>
   function copy() {
     let prompt = document.querySelector("textarea#prompt").value;
     let content = document.querySelector("textarea#texts").value;
 
-    let toClipboard = `${prompt}\n${content}`.split('\n').map((line) => {return line.trim()}).join('\n').replace('\n\n', '\n');
+//    let toClipboard = `${prompt}\n${content}`.split('\n').map((line) => {return line.trim()}).join('\n').replace('\n\n', '\n');
+    let toClipboard = prompt.replace('{{ content }}', content).split('\n').map((line) => {return line.trim()}).join('\n').replace('\n\n', '\n');
 
     navigator.clipboard
       .writeText(toClipboard)
@@ -27,6 +29,7 @@
       });
   }
 </script>
+{{/raw}}
 
 <h5 class="card-header">{{title}}</h5>
 <div class="card-body">
