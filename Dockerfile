@@ -23,7 +23,8 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ./assets/ ./templates/ /app/assets/
+COPY ./assets /app/assets/
+COPY ./templates /app/templates/
 COPY --from=backend /build/main /app/aktuelle5minuten
 
 # Default environment variables. Should only be touched, if you know what you are doing.
