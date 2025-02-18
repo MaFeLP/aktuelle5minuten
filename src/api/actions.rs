@@ -60,7 +60,16 @@ pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
                 diesel::insert_into(articles)
                     .values(&new_article)
                     .on_conflict(key)
-                    .do_nothing()
+                    .do_update()
+                    .set((
+                        title.eq(&new_article.title.clone()),
+                        teaser_headline.eq(&new_article.teaser_headline.clone()),
+                        teaser_text.eq(&new_article.teaser_text.clone()),
+                        kicker.eq(&new_article.kicker.clone()),
+                        description.eq(&new_article.description.clone()),
+                        content.eq(&new_article.content.clone()),
+                        content_html.eq(&new_article.content_html.clone()),
+                    ))
                     .execute(c)
                     .map_err(|why| {
                         error!("Failed to insert article {}: {:?}", &new_article.key, why);
@@ -69,16 +78,7 @@ pub async fn load_new_articles(conn: DbConn) -> Result<Status, Status> {
             })
             .await?;
         if inserted_article != 1 {
-            conn.run(move |c| {
-                diesel::update(crate::schema::articles::table.filter(key.eq(&article_key)))
-                    .set(status.eq(i32::from(ArticleStatus::Uncategorized)))
-                    .execute(c)
-                    .map_err(|err| {
-                        error!("Failed to update article {}: {}", &article_key, err);
-                        Status::InternalServerError
-                    })
-            })
-            .await?;
+            error!("Could not insert/update article '{}'!", article_key);
         }
     }
     Ok(Status::Created)
