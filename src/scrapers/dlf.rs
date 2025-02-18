@@ -19,6 +19,21 @@ macro_rules! select_one {
     };
 }
 
+macro_rules! select_one_text {
+    ($parent:expr, $selector:expr, $default:expr) => {
+        match $parent
+            .select(
+                &::scraper::Selector::parse($selector)
+                    .expect(&format!("Failed to parse the selector '{}'", $selector)),
+            )
+            .next()
+        {
+            Some(element) => element.text().collect::<String>().trim().to_string(),
+            None => $default.to_string(),
+        }
+    };
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PartialArticle {
     pub key: String,
@@ -219,24 +234,9 @@ pub async fn article(href: &str) -> Result<Article, DlfError> {
     );
 
     Ok(Article {
-        kicker: String::from(
-            select_one!(header, "span.headline-kicker")
-                .text()
-                .collect::<String>()
-                .trim(),
-        ),
-        title: String::from(
-            select_one!(header, "span.headline-title")
-                .text()
-                .collect::<String>()
-                .trim(),
-        ),
-        description: String::from(
-            select_one!(header, "p.article-header-description")
-                .text()
-                .collect::<String>()
-                .trim(),
-        ),
+        kicker: select_one_text!(header, "span.headline-kicker", ""),
+        title: select_one_text!(header, "span.headline-title", ""),
+        description: select_one_text!(header, "p.article-header-description", ""),
         html: content_html.root_element().inner_html(),
         plaintext: content_html.root_element().text().collect(),
         figures,
