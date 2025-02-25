@@ -38,7 +38,7 @@ impl SystemWorld {
         .flat_map(|entry| {
             let path = entry.path();
             let bytes = std::fs::read(&path).unwrap();
-            let buffer = Bytes::from(bytes);
+            let buffer = Bytes::new(bytes);
             let face_count = ttf_parser::fonts_in_collection(&buffer).unwrap_or(1);
             (0..face_count).map(move |face| {
                 Font::new(buffer.clone(), face).unwrap_or_else(|| {
@@ -176,7 +176,7 @@ pub async fn create_typst_pdf(conn: DbConn, filename: &str) -> Result<Vec<u8>, S
     let now = time::OffsetDateTime::now_utc();
     let options = PdfOptions {
         ident: Smart::Auto,
-        timestamp: Some(
+        timestamp: Some(typst_pdf::Timestamp::new_utc(
             typst::foundations::Datetime::from_ymd_hms(
                 now.year(),
                 now.month().into(),
@@ -186,7 +186,7 @@ pub async fn create_typst_pdf(conn: DbConn, filename: &str) -> Result<Vec<u8>, S
                 now.second(),
             )
             .unwrap(),
-        ),
+        )),
         page_ranges: None, // Export all pages
         standards: PdfStandards::new(&[PdfStandard::A_2b]).unwrap(),
     };
