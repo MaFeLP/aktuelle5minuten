@@ -65,6 +65,17 @@ async fn next_tinder_card(
     current_articles: u32,
     max_articles: Option<i64>,
 ) -> Result<Template, Status> {
+    let date = match date {
+        Some(date) => {
+            if date.is_empty() {
+                None
+            } else {
+                Some(date)
+            }
+        }
+        None => None,
+    };
+
     let article = match get_first_article(&conn, date.clone()).await? {
         Some(article) => article,
         None => {
