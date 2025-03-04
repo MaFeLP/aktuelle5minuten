@@ -51,29 +51,50 @@
         }
       }
     }
+
+    #drag-drop {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        margin: 0px;
+        padding: 15px;
+
+        display: flex;
+        flex-direction: row;
+        gap: 15px;
+
+        div.drop-target {
+            opacity: 25%;
+            height: 100%;
+            width: 100%;
+        }
+        div.drag-hover {
+            opacity: 50%;
+        }
+        #drag-promote {
+            background-color: var(--bs-success);
+        }
+        #drag-cancel {
+            background-color: var(--bs-secondary);
+        }
+        #drag-demote {
+            background-color: var(--bs-danger);
+        }
+    }
   </style>
 {{/inline}}
 
 {{#*inline "content" }}
   {{> components/home_button }}
 
+  <div id="drag-drop" class="visually-hidden">
+      <div id="drag-promote" class="drop-target"></div>
+      <div id="drag-cancel" class="drop-target"></div>
+      <div id="drag-demote" class="drop-target"></div>
+  </div>
+
   {{> components/tinder_partial }}
 
-  <script>
-    function openPromoteDialog() {
-      document.getElementById("promote-dialog").showModal();
-    }
-    function closePromoteDialog() {
-      document.getElementById("promote-dialog").close();
-    }
-
-    window.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowLeft") {
-        document.getElementById("promote-dialog").showModal();
-      } else if (event.key === "ArrowRight") {
-        document.querySelector("button#tinder-demote-submit-button").click();
-      }
-    });
-  </script>
+  <script src="/assets/js/tinder.js"></script>
 {{/inline}}
 {{> base htmx=true}}
