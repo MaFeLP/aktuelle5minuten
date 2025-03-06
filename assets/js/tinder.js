@@ -6,15 +6,6 @@ function closePromoteDialog() {
     document.getElementById("promote-dialog").close();
 }
 
-// Keyboard shortcuts for desktop
-window.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowLeft") {
-        document.getElementById("promote-dialog").showModal();
-    } else if (event.key === "ArrowRight") {
-        document.querySelector("button#tinder-demote-submit-button").click();
-    }
-});
-
 function initDesktopDragDrop() {
     // Start of Drag and Drop (drag)
     document.getElementById('tinder-card').addEventListener('dragstart', (event) => {
@@ -108,14 +99,29 @@ function dropped(event) {
 }
 
 function initDragDrop() {
-    initDesktopDragDrop();
-    initMobileDragDrop();
+    // Needs to be re-checked, in order to avoid errors
+    if (document.getElementById('alert-no-articles') !== null) {
+        initDesktopDragDrop();
+        initMobileDragDrop();
+    }
 }
 
-document.addEventListener('htmx:afterRequest', (event) => {
-    // https://htmx.org/events/#htmx:afterRequest
-    initDragDrop();
-});
+// Only execute, when articles are present
+if (document.getElementById('alert-no-articles') !== null) {
+    // Keyboard shortcuts for desktop
+    window.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft") {
+            document.getElementById("promote-dialog").showModal();
+        } else if (event.key === "ArrowRight") {
+            document.querySelector("button#tinder-demote-submit-button").click();
+        }
+    });
 
-window.addEventListener('DOMContentLoaded', (event) => initDragDrop());
+    document.addEventListener('htmx:afterRequest', (event) => {
+        // https://htmx.org/events/#htmx:afterRequest
+        initDragDrop();
+    });
+
+    window.addEventListener('DOMContentLoaded', (event) => initDragDrop());
+}
 
