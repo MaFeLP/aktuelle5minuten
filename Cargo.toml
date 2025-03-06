@@ -1,6 +1,6 @@
 [package]
 name = "aktuelle5minuten"
-version = "2.0.0-beta2"
+version = "2.0.0-beta3"
 edition = "2021"
 
 [dependencies]
