@@ -1,5 +1,5 @@
 # Create the rust backend
-FROM rust:1.88-slim-bookworm AS backend
+FROM rust:1.89-slim-bookworm AS backend
 RUN apt-get update && apt-get install -y \
     libsqlite3-dev libssl-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
