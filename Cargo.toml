@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 diesel = { version = "2.2", features = ["time"] }
 diesel_migrations = "2.2"
-regex = "1.11"
+regex = "1.12"
 reqwest = "0.12"
 rocket = { version = "0.5.1", features = ["json"] }
 rocket_dyn_templates = { version = "0.2", features = ["handlebars"] }
