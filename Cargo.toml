@@ -24,4 +24,4 @@ thiserror = "2.0"
 ecow = "0.2"
 
 [dev-dependencies]
-tokio = "1.47"
+tokio = "1.48"
