@@ -18,7 +18,7 @@ time = {version = "0.3", features = ["serde-human-readable", "local-offset"] }
 
 # Typst dependencies
 typst = "0.13"
-typst-pdf = "0.13"
+typst-pdf = "0.14"
 ttf-parser = "0.25"
 thiserror = "2.0"
 ecow = "0.2"
