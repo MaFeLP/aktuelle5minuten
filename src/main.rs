@@ -19,19 +19,20 @@ macro_rules! regex {
     }};
 }
 
-use diesel::{sqlite::Sqlite, SqliteConnection};
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use diesel::{SqliteConnection, sqlite::Sqlite};
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::Status;
 use rocket::{Orbit, Rocket};
+use rocket_dyn_templates::Template;
 use rocket_dyn_templates::handlebars::{
     Context, Handlebars, Helper, HelperResult, Output, RenderContext, RenderError,
     RenderErrorReason,
 };
-use rocket_dyn_templates::Template;
 use rocket_sync_db_pools::database;
 use std::path::{Path, PathBuf};
 use typst::diag::{Severity, SourceDiagnostic};
+use typst::ecow::EcoVec;
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
@@ -49,8 +50,8 @@ pub(crate) enum ServerError {
     IoError(#[from] std::io::Error),
 }
 
-impl From<ecow::EcoVec<SourceDiagnostic>> for ServerError {
-    fn from(err: ecow::EcoVec<SourceDiagnostic>) -> Self {
+impl From<EcoVec<SourceDiagnostic>> for ServerError {
+    fn from(err: EcoVec<SourceDiagnostic>) -> Self {
         let mut out = String::new();
 
         for diag in err {

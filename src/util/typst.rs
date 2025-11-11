@@ -1,12 +1,13 @@
 use crate::{DbConn, ServerError};
 use std::io::Write;
 use std::path::PathBuf;
+use typst::Library;
+use typst::LibraryExt;
 use typst::diag::FileResult;
 use typst::foundations::{Bytes, Datetime};
 use typst::syntax::{FileId, Source};
 use typst::text::{Font, FontBook};
 use typst::utils::LazyHash;
-use typst::Library;
 
 /// Main interface that determines the environment for Typst.
 pub struct SystemWorld {
@@ -189,6 +190,7 @@ pub async fn create_typst_pdf(conn: DbConn, filename: &str) -> Result<Vec<u8>, S
         )),
         page_ranges: None, // Export all pages
         standards: PdfStandards::new(&[PdfStandard::A_2b]).unwrap(),
+        tagged: true,
     };
 
     let pdf = typst_pdf::pdf(&document, &options)?;
@@ -216,9 +218,10 @@ pub async fn create_typst_pdf(conn: DbConn, filename: &str) -> Result<Vec<u8>, S
 mod test {
     use super::*;
     use typst::diag::{Severity, SourceDiagnostic};
+    use typst::ecow::EcoVec;
 
     #[test]
-    fn typst_compile() -> Result<(), ecow::EcoVec<SourceDiagnostic>> {
+    fn typst_compile() -> Result<(), EcoVec<SourceDiagnostic>> {
         let content = include_str!("typst_template.typ")
             .replace("{{ author }}", "Test")
             .replace("{{ title }}", "Test");
@@ -251,6 +254,7 @@ mod test {
             timestamp: None,
             page_ranges: None, // Export all pages
             standards: typst_pdf::PdfStandards::new(&[typst_pdf::PdfStandard::A_2b]).unwrap(),
+            tagged: true,
         };
 
         let pdf = typst_pdf::pdf(&document, &options)?;

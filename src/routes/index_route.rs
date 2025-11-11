@@ -1,9 +1,9 @@
 use crate::ServerError;
 use rocket::http::Status;
-use rocket_dyn_templates::{context, Template};
+use rocket_dyn_templates::{Template, context};
 use std::ops::Sub;
-use time::macros::format_description;
 use time::Duration;
+use time::macros::format_description;
 
 #[get("/")]
 pub(crate) async fn index() -> Result<Template, Status> {

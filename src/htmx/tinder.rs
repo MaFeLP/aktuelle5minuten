@@ -5,7 +5,7 @@ use crate::{DbConn, ServerError};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::form::Form;
 use rocket::http::Status;
-use rocket_dyn_templates::{context, Template};
+use rocket_dyn_templates::{Template, context};
 use time::macros::format_description;
 
 #[derive(FromForm)]

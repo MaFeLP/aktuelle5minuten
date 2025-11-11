@@ -1,8 +1,8 @@
+use crate::DbConn;
 use crate::util::count_articles;
 use crate::util::tinder::{cache_next_article, get_categories, get_first_article};
-use crate::DbConn;
 use rocket::http::Status;
-use rocket_dyn_templates::{context, Template};
+use rocket_dyn_templates::{Template, context};
 use time::macros::format_description;
 
 #[get("/tinder?<date>")]
@@ -16,7 +16,7 @@ pub(crate) async fn tinder(conn: DbConn, date: Option<String>) -> Result<Templat
                     has_articles: false,
                     date: date.unwrap_or_default(),
                 },
-            ))
+            ));
         }
     };
     let number_of_articles = count_articles(&conn, date.clone()).await?;

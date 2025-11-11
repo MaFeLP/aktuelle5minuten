@@ -1,4 +1,4 @@
-use crate::{regex, DbConn, ServerError};
+use crate::{DbConn, ServerError, regex};
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]

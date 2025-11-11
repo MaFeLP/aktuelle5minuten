@@ -1,4 +1,4 @@
-use crate::{api, DbConn};
+use crate::{DbConn, api};
 use rocket::http::Status;
 use rocket::response::Redirect;
 

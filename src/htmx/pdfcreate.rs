@@ -1,15 +1,15 @@
-use crate::api::category::{typst_escape, BulletsForm};
+use crate::api::category::{BulletsForm, typst_escape};
 use crate::models::ArticleStatus;
 use crate::util::pdfcreation::get_category_contents;
 use crate::util::tinder::get_categories;
-use crate::util::{wait_for_false, AI_PROMPT};
-use crate::{regex, DbConn};
+use crate::util::{AI_PROMPT, wait_for_false};
+use crate::{DbConn, regex};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use rocket::Either;
 use rocket::form::Form;
 use rocket::http::Status;
 use rocket::response::content::RawHtml;
-use rocket::Either;
-use rocket_dyn_templates::{context, Template};
+use rocket_dyn_templates::{Template, context};
 use std::sync::atomic::{AtomicBool, Ordering};
 use time::macros::format_description;
 

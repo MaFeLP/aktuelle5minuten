@@ -3,9 +3,9 @@ use crate::{DbConn, ServerError};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::http::Status;
 use rocket::serde::Serialize;
-use rocket_dyn_templates::{context, Template};
-use time::macros::format_description;
+use rocket_dyn_templates::{Template, context};
 use time::Date;
+use time::macros::format_description;
 
 #[get("/dates")]
 pub(crate) async fn dates(db: DbConn) -> Result<Template, Status> {

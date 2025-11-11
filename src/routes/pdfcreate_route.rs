@@ -1,11 +1,11 @@
+use crate::DbConn;
+use crate::util::AI_PROMPT;
 use crate::util::pdfcreation::get_category_contents;
 use crate::util::tinder::get_categories;
-use crate::util::AI_PROMPT;
-use crate::DbConn;
+use rocket::Either;
 use rocket::http::Status;
 use rocket::response::Redirect;
-use rocket::Either;
-use rocket_dyn_templates::{context, Template};
+use rocket_dyn_templates::{Template, context};
 
 #[get("/pdfcreate")]
 pub(crate) async fn pdfcreate(conn: DbConn) -> Result<Either<Redirect, Template>, Status> {

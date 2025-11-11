@@ -79,11 +79,10 @@ fn parse_partial_article(json: &str) -> Result<Option<PartialArticle>, ParseErro
                         &json
                     );
                 }
-                None =>
-                    debug!(
-                        "Found data element that does not fit scheme! See debug output for more information: {:?}",
-                        &json
-                    )
+                None => debug!(
+                    "Found data element that does not fit scheme! See debug output for more information: {:?}",
+                    &json
+                ),
             }
             Ok(None)
         }

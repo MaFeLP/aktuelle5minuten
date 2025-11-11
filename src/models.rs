@@ -7,7 +7,7 @@ use crate::scrapers::dlf::PartialArticle;
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 use serde::Serialize;
 use time::format_description::BorrowedFormatItem;
-use time::{macros::format_description, PrimitiveDateTime};
+use time::{PrimitiveDateTime, macros::format_description};
 
 pub const DATE_FORMAT: &[BorrowedFormatItem] = format_description!("[year]-[month]-[day]");
 //pub const DATETIME_FORMAT: &[BorrowedFormatItem] = format_description!("[year]-[month]-[day] [year]-[month]-[day] [hour]:[minute]:[second].[subsecond]");
