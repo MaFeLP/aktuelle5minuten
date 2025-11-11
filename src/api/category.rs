@@ -39,7 +39,7 @@ pub async fn bullets(conn: DbConn, bullets: Form<BulletsForm<'_>>) -> Result<Red
     use crate::schema::print_articles::dsl as print_dsl;
     use crate::util;
 
-    let category = typst_escape(&bullets.category);
+    let category = typst_escape(bullets.category);
     let category2 = category.clone();
     let category3 = category.clone();
     let text = typst_escape(bullets.bullets);

@@ -52,7 +52,6 @@ pub(crate) fn cache_next_article(conn: DbConn, date: Option<String>) {
         match article {
             None => {
                 info!("No articles to cache.");
-                return;
             }
             Some(article) => {
                 let article = download_and_parse_dlf_article(&conn, article)

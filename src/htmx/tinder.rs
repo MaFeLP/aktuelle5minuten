@@ -65,16 +65,7 @@ async fn next_tinder_card(
     current_articles: u32,
     max_articles: Option<i64>,
 ) -> Result<Template, Status> {
-    let date = match date {
-        Some(date) => {
-            if date.is_empty() {
-                None
-            } else {
-                Some(date)
-            }
-        }
-        None => None,
-    };
+    let date = date.filter(|date| !date.is_empty());
 
     let article = match get_first_article(&conn, date.clone()).await? {
         Some(article) => article,
@@ -140,7 +131,7 @@ pub async fn demote_article(
         diesel::update(dsl::articles.find(key))
             .set(dsl::status.eq(i32::from(ArticleStatus::Demoted)))
             .execute(c)
-            .map_err(|err| ServerError::DatabaseError(err))
+            .map_err(ServerError::DatabaseError)
     })
     .await?;
 

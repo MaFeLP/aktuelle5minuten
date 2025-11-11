@@ -35,7 +35,7 @@ impl SystemWorld {
         )
         .expect("Could not read fonts from disk")
         .map(Result::unwrap)
-        .filter(|entry| entry.path().extension().map_or(false, |ext| ext == "ttf"))
+        .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "ttf"))
         .flat_map(|entry| {
             let path = entry.path();
             let bytes = std::fs::read(&path).unwrap();

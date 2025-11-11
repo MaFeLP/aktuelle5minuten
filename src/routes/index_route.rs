@@ -15,8 +15,8 @@ pub(crate) async fn index() -> Result<Template, Status> {
     Ok(Template::render(
         "index",
         context! {
-            start_date: today.format(format_description!("[year]-[month]-[day]")).map_err(|err| ServerError::DateFormat(err))?.to_string(),
-            end_date: last_week.format(format_description!("[year]-[month]-[day]")).map_err(|err| ServerError::DateFormat(err))?.to_string(),
+            start_date: today.format(format_description!("[year]-[month]-[day]")).map_err(ServerError::DateFormat)?.to_string(),
+            end_date: last_week.format(format_description!("[year]-[month]-[day]")).map_err(ServerError::DateFormat)?.to_string(),
         },
     ))
 }

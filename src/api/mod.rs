@@ -57,7 +57,7 @@ pub async fn count(conn: DbConn, date: Option<String>) -> Result<Json<CountRespo
                     .select(diesel::dsl::count_star())
                     .filter(diesel::dsl::date(dsl::date).eq(date))
                     .first::<i64>(c)
-                    .map_err(|err| ServerError::DatabaseError(err))
+                    .map_err(ServerError::DatabaseError)
             })
             .await?;
         Ok(Json(CountResponse {
@@ -70,7 +70,7 @@ pub async fn count(conn: DbConn, date: Option<String>) -> Result<Json<CountRespo
                 dsl::articles
                     .select(diesel::dsl::count_star())
                     .first::<i64>(c)
-                    .map_err(|err| ServerError::DatabaseError(err))
+                    .map_err(ServerError::DatabaseError)
             })
             .await?;
         Ok(Json(CountResponse {
