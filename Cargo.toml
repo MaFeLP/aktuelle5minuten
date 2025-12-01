@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 diesel = { version = "2.2", features = ["time"] }
-diesel_migrations = "2.2"
+diesel_migrations = "2.3"
 regex = "1.12"
 reqwest = "0.12"
 rocket = { version = "0.5.1", features = ["json"] }
